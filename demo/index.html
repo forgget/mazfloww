@@ -1,0 +1,2587 @@
+<title>MazFlow</title>
+<style>
+:root {
+  --color-primary: #0033ff;
+  --color-primary-dark: #0026bf;
+  --color-white: #ffffff;
+  --color-gray: #737889;
+  --color-gray-light: #b9bcc2;
+  --color-black: #10111a;
+  --color-green: #1e8e3e;
+  --color-green-bg: #e6f4ea;
+  --color-red: #d93025;
+  --color-red-bg: #fce8e6;
+  --color-amber: #a35a00;
+  --color-amber-bg: #fdf0e0;
+  --color-navy: #10112c;
+  --color-bg-app: #eef2f1;
+  --color-border: #e2e5ea;
+  --color-active-bg: #eef0ff;
+  --color-table-head-bg: #f4f5fb;
+  --color-slate: #9aa3bd;
+  --sidebar-width: 224px;
+  --topbar-height: 64px;
+}
+
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+
+body {
+  margin: 0;
+  padding: 0;
+  font-family: "Segoe UI", Roboto, -apple-system, BlinkMacSystemFont, Arial, sans-serif;
+  background: var(--color-bg-app);
+  color: var(--color-black);
+  -webkit-font-smoothing: antialiased;
+  font-size: 16px;
+}
+
+button, input, select, textarea { font-family: inherit; }
+a { color: inherit; }
+img { max-width: 100%; }
+:focus-visible { outline: 2px solid var(--color-primary); outline-offset: 2px; }
+
+/* ===================== Login ===================== */
+.mz-login {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 32px 16px;
+  background: radial-gradient(circle at 20% 15%, #1b1d46 0%, var(--color-navy) 55%, #08091a 100%);
+}
+.mz-login__card {
+  background: var(--color-white);
+  border-radius: 16px;
+  width: 100%;
+  max-width: 420px;
+  padding: 32px 30px;
+  box-shadow: 0 24px 60px rgba(4, 6, 28, .45);
+}
+.mz-login__brand { display: flex; align-items: center; gap: 10px; margin-bottom: 6px; }
+.mz-login__brand .mz-logo-badge { background: var(--color-primary); }
+.mz-login__brand-text { font-size: 22px; font-weight: 700; }
+.mz-login__brand-text .mz-brand-maz { color: var(--color-black); }
+.mz-login__brand-text .mz-brand-flow { color: var(--color-primary); }
+.mz-login__sub { color: var(--color-gray); font-size: 14px; margin: 0 0 24px; }
+.mz-login__hint { font-size: 12px; color: var(--color-gray); text-align: center; margin: 16px 0 0; line-height: 1.6; }
+.mz-login__hint strong { color: var(--color-black); }
+
+/* ===================== Topbar ===================== */
+.mz-topbar {
+  position: sticky;
+  top: env(safe-area-inset-top, 0px);
+  z-index: 40;
+  height: var(--topbar-height);
+  background: var(--color-navy);
+  color: var(--color-white);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 20px;
+  gap: 16px;
+}
+.mz-topbar__brand { display: flex; align-items: center; gap: 10px; min-width: 0; }
+.mz-logo-badge {
+  width: 30px; height: 30px; border-radius: 8px;
+  background: var(--color-primary); color: var(--color-white);
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 700; font-size: 12px; flex: none;
+}
+.mz-brand-text { font-size: 18px; font-weight: 700; white-space: nowrap; }
+.mz-brand-maz { color: var(--color-white); }
+.mz-brand-flow { color: #5b7dff; }
+.mz-hamburger { display: none; background: transparent; border: none; color: var(--color-white); font-size: 22px; cursor: pointer; padding: 4px 8px; line-height: 1; }
+.mz-topbar__right { display: flex; align-items: center; gap: 16px; flex: none; }
+.mz-topbar__date { color: #b7bad6; font-size: 14px; white-space: nowrap; }
+.mz-bell { position: relative; background: transparent; border: none; color: #cfd2ea; cursor: pointer; display: flex; align-items: center; padding: 4px; border-radius: 6px; }
+.mz-bell:hover { color: var(--color-white); }
+.mz-badge--bell {
+  position: absolute; top: -4px; right: -6px; background: var(--color-red); color: var(--color-white);
+  border-radius: 999px; font-size: 10px; font-weight: 700; min-width: 16px; height: 16px;
+  display: flex; align-items: center; justify-content: center; padding: 0 3px;
+}
+.mz-notif { position: relative; }
+.mz-notif__panel {
+  display: none; position: absolute; right: 0; top: calc(100% + 10px);
+  background: var(--color-white); color: var(--color-black); border-radius: 10px;
+  box-shadow: 0 12px 32px rgba(0,0,0,.22); width: 320px; max-width: calc(100vw - 32px);
+  overflow: hidden; z-index: 55;
+}
+.mz-notif.open .mz-notif__panel { display: block; }
+.mz-notif__head { padding: 12px 16px; border-bottom: 1px solid var(--color-border); font-size: 12px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--color-gray); }
+.mz-notif__item { display: flex; gap: 10px; align-items: flex-start; width: 100%; text-align: left; background: transparent; border: none; border-bottom: 1px solid var(--color-border); padding: 12px 16px; cursor: pointer; font-size: 13px; line-height: 1.45; }
+.mz-notif__item:last-child { border-bottom: none; }
+.mz-notif__item:hover { background: #f5f6fa; }
+.mz-notif__dot { flex: none; width: 8px; height: 8px; border-radius: 999px; margin-top: 5px; }
+.mz-notif__dot--danger { background: var(--color-red); }
+.mz-notif__dot--warning { background: var(--color-amber); }
+.mz-notif__title { font-weight: 600; display: block; }
+.mz-notif__meta { color: var(--color-gray); font-size: 12px; }
+.mz-user { position: relative; }
+.mz-user__btn { display: flex; align-items: center; gap: 8px; background: transparent; border: none; color: var(--color-white); cursor: pointer; padding: 6px 4px; border-radius: 6px; }
+.mz-avatar { width: 30px; height: 30px; border-radius: 999px; background: var(--color-primary); color: var(--color-white); font-size: 12px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex: none; }
+.mz-user__name { font-size: 14px; white-space: nowrap; }
+.mz-user__caret { font-size: 10px; color: #b7bad6; }
+.mz-user__dropdown { display: none; position: absolute; right: 0; top: calc(100% + 8px); background: var(--color-white); color: var(--color-black); border-radius: 10px; box-shadow: 0 12px 32px rgba(0,0,0,.22); min-width: 220px; overflow: hidden; z-index: 55; }
+.mz-user.open .mz-user__dropdown { display: block; }
+.mz-user__info { padding: 14px 16px; border-bottom: 1px solid var(--color-border); }
+.mz-user__info strong { display: block; font-size: 14px; }
+.mz-user__info span { font-size: 12px; color: var(--color-gray); }
+.mz-menu-item { width: 100%; text-align: left; padding: 11px 16px; background: transparent; border: none; cursor: pointer; font-size: 14px; display: flex; align-items: center; gap: 8px; }
+.mz-menu-item:hover { background: #f5f6fa; }
+.mz-menu-item--danger { color: var(--color-red); }
+.mz-menu-item--danger:hover { background: var(--color-red-bg); }
+
+/* ===================== Shell ===================== */
+.mz-shell { display: flex; align-items: stretch; min-height: calc(100vh - var(--topbar-height)); }
+.mz-sidebar { width: var(--sidebar-width); flex: none; background: var(--color-white); border-right: 1px solid var(--color-border); display: flex; flex-direction: column; justify-content: space-between; padding: 20px 12px; }
+.mz-nav { display: flex; flex-direction: column; gap: 4px; }
+.mz-nav__item { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 8px; border-left: 3px solid transparent; color: var(--color-black); text-decoration: none; font-size: 14px; cursor: pointer; background: transparent; }
+.mz-nav__item:hover { background: #f5f6fa; }
+.mz-nav__item.active { background: var(--color-active-bg); border-left-color: var(--color-primary); font-weight: 600; color: var(--color-primary-dark); }
+.mz-nav__icon { display: flex; align-items: center; flex: none; }
+.mz-nav__label { flex: 1; min-width: 0; }
+.mz-nav__badge { background: var(--color-primary); color: var(--color-white); font-size: 11px; font-weight: 700; border-radius: 999px; min-width: 18px; height: 18px; padding: 0 5px; display: flex; align-items: center; justify-content: center; }
+.mz-nav__badge--danger { background: var(--color-red); }
+.mz-logout-btn { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 8px; background: transparent; border: none; color: var(--color-black); font-size: 14px; cursor: pointer; width: 100%; text-align: left; }
+.mz-logout-btn:hover { background: #f5f6fa; color: var(--color-red); }
+.mz-overlay { display: none; position: fixed; inset: 0; background: rgba(10,10,30,.4); z-index: 45; }
+.mz-content { flex: 1; min-width: 0; padding: 28px 32px 60px; }
+.mz-page-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; margin-bottom: 22px; flex-wrap: wrap; }
+.mz-page-header h1 { margin: 0 0 4px; font-size: 26px; text-wrap: balance; }
+.mz-page-header p { margin: 0; color: var(--color-gray); font-size: 14px; }
+.mz-header-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+
+/* ===================== Buttons ===================== */
+.mz-btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; border-radius: 8px; border: none; font-size: 14px; font-weight: 600; padding: 10px 18px; cursor: pointer; white-space: nowrap; }
+.mz-btn:disabled { cursor: not-allowed; opacity: .55; }
+.mz-btn--primary { background: var(--color-primary); color: var(--color-white); }
+.mz-btn--primary:hover:not(:disabled) { background: var(--color-primary-dark); }
+.mz-btn--secondary { background: #eceef4; color: #454a5c; }
+.mz-btn--secondary:hover:not(:disabled) { background: #e0e3ed; }
+.mz-btn--ghost { background: transparent; color: var(--color-primary); border: 1px solid var(--color-border); }
+.mz-btn--ghost:hover:not(:disabled) { background: var(--color-active-bg); }
+.mz-btn--danger { background: var(--color-red); color: var(--color-white); }
+.mz-btn--danger:hover:not(:disabled) { background: #b3251c; }
+.mz-btn--block { width: 100%; }
+.mz-btn--sm { padding: 6px 12px; font-size: 13px; }
+
+/* ===================== Cards ===================== */
+.mz-card { background: var(--color-white); border: 1px solid var(--color-border); border-radius: 12px; padding: 22px; }
+.mz-card + .mz-card { margin-top: 20px; }
+.mz-card__header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; gap: 12px; flex-wrap: wrap; }
+.mz-eyebrow { font-size: 12px; font-weight: 700; letter-spacing: .06em; color: var(--color-gray); text-transform: uppercase; margin: 0 0 10px; }
+
+/* ===================== Forms ===================== */
+.mz-field { display: flex; flex-direction: column; gap: 6px; margin-bottom: 14px; }
+.mz-field label { font-size: 12px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; color: var(--color-gray); }
+.mz-input, .mz-select { border: 1px solid var(--color-border); border-radius: 8px; padding: 10px 12px; font-size: 14px; color: var(--color-black); background: var(--color-white); width: 100%; }
+.mz-input:focus, .mz-select:focus { outline: none; border-color: var(--color-primary); box-shadow: 0 0 0 3px rgba(0,51,255,.12); }
+.mz-field-row { display: flex; gap: 16px; flex-wrap: wrap; }
+.mz-field-row .mz-field { flex: 1; min-width: 200px; }
+.mz-search { position: relative; min-width: 200px; }
+.mz-search .mz-input { padding-left: 34px; }
+.mz-search__icon { position: absolute; left: 11px; top: 50%; transform: translateY(-50%); color: var(--color-gray); display: flex; pointer-events: none; }
+.mz-form-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+
+/* ===================== Tables ===================== */
+.mz-table-wrap { overflow-x: auto; }
+.mz-table { width: 100%; border-collapse: collapse; font-size: 14px; font-variant-numeric: tabular-nums; }
+.mz-table thead th { background: var(--color-table-head-bg); text-align: left; font-size: 11px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--color-gray); padding: 12px 16px; }
+.mz-table tbody td { padding: 14px 16px; border-bottom: 1px solid var(--color-border); vertical-align: middle; }
+.mz-table tbody tr:last-child td { border-bottom: none; }
+.mz-table tbody tr.is-editing { background: var(--color-active-bg); }
+.mz-table .num { text-align: right; white-space: nowrap; }
+.mz-table tfoot td { padding: 14px 16px; background: var(--color-table-head-bg); font-weight: 700; }
+.mz-unit { color: var(--color-gray); }
+.mz-tag { display: inline-flex; align-items: center; gap: 4px; font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 999px; margin-left: 6px; }
+.mz-tag--danger { background: var(--color-red-bg); color: var(--color-red); }
+.mz-tag--success { background: var(--color-green-bg); color: var(--color-green); }
+.mz-tag--warning { background: var(--color-amber-bg); color: var(--color-amber); }
+.mz-tag--neutral { background: var(--color-active-bg); color: var(--color-primary-dark); }
+.mz-value--danger { color: var(--color-red); font-weight: 700; }
+.mz-value--positive { color: var(--color-green); }
+.mz-value--negative { color: var(--color-red); }
+.mz-row-actions { display: flex; gap: 8px; justify-content: flex-end; }
+.mz-icon-btn { background: transparent; border: none; cursor: pointer; color: var(--color-gray); padding: 5px; display: flex; align-items: center; border-radius: 6px; }
+.mz-icon-btn:hover { color: var(--color-primary); background: var(--color-active-bg); }
+.mz-icon-btn--danger:hover { color: var(--color-red); background: var(--color-red-bg); }
+
+/* ===================== Slider / resumo ===================== */
+.mz-slider { width: 100%; accent-color: var(--color-primary); margin: 8px 0 4px; }
+.mz-slider-labels { display: flex; justify-content: space-between; font-size: 12px; color: var(--color-gray); }
+.mz-summary-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 16px; }
+.mz-summary-row .label { font-size: 13px; color: var(--color-gray); }
+.mz-summary-row .value { font-size: 16px; font-weight: 700; font-variant-numeric: tabular-nums; }
+.mz-highlight-box { background: var(--color-primary); color: var(--color-white); border-radius: 10px; padding: 16px; margin: 16px 0; }
+.mz-highlight-box .label { font-size: 12px; text-transform: uppercase; letter-spacing: .04em; opacity: .85; }
+.mz-highlight-box .value { font-size: 28px; font-weight: 700; margin-top: 4px; font-variant-numeric: tabular-nums; }
+.mz-two-col { display: grid; grid-template-columns: minmax(0,1fr) 340px; gap: 20px; align-items: start; }
+
+/* ===================== Alerts / toast ===================== */
+.mz-alert { border-radius: 8px; padding: 12px 14px; font-size: 14px; margin-bottom: 16px; display: flex; align-items: flex-start; gap: 8px; }
+.mz-alert--error { background: var(--color-red-bg); color: #8c231c; border: 1px solid #f2b8b3; }
+.mz-alert--success { background: var(--color-green-bg); color: #155724; border: 1px solid #b7e1c1; }
+.mz-alert--info { background: #eef0ff; color: #1a2a80; border: 1px solid #c7cdf5; }
+.mz-alert--warning { background: var(--color-amber-bg); color: #7a4300; border: 1px solid #f0d3ab; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; }
+.mz-alert--warning .mz-alert__text { display: flex; align-items: flex-start; gap: 8px; }
+.mz-alert__link { color: var(--color-primary); font-weight: 700; font-size: 13px; white-space: nowrap; cursor: pointer; background: none; border: none; padding: 0; }
+.mz-alert__link:hover { text-decoration: underline; }
+.mz-toast-wrap { position: fixed; right: 20px; bottom: calc(20px + env(safe-area-inset-bottom, 0px)); z-index: 90; display: flex; flex-direction: column; gap: 10px; max-width: calc(100vw - 40px); }
+.mz-toast { background: var(--color-navy); color: var(--color-white); border-radius: 10px; padding: 13px 16px; font-size: 14px; box-shadow: 0 12px 30px rgba(0,0,0,.28); display: flex; align-items: center; gap: 10px; }
+.mz-toast__mark { flex: none; width: 8px; height: 8px; border-radius: 999px; background: #57d98a; }
+.mz-toast--error .mz-toast__mark { background: #ff7a6e; }
+.mz-toast--info .mz-toast__mark { background: #7da0ff; }
+
+/* ===================== Modal ===================== */
+.mz-modal-backdrop { position: fixed; inset: 0; background: rgba(10,10,30,.45); display: flex; align-items: center; justify-content: center; z-index: 60; padding: 16px; }
+.mz-modal { background: var(--color-white); border-radius: 12px; width: 100%; max-width: 440px; padding: 24px; max-height: 88vh; overflow-y: auto; }
+.mz-modal--wide { max-width: 640px; }
+.mz-modal h2 { margin: 0 0 4px; font-size: 19px; }
+.mz-modal .mz-modal-sub { color: var(--color-gray); font-size: 13px; margin: 0 0 18px; }
+.mz-modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 18px; flex-wrap: wrap; }
+
+.mz-empty { text-align: center; color: var(--color-gray); padding: 40px 12px; }
+.mz-hidden { display: none !important; }
+.mz-reset-demo { display: block; text-align: center; font-size: 11px; color: var(--color-gray); text-decoration: underline; background: none; border: none; cursor: pointer; padding: 8px 4px 2px; width: 100%; }
+.mz-reset-demo:hover { color: var(--color-primary); }
+
+/* ===================== KPIs ===================== */
+.mz-kpi-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 18px; margin-bottom: 20px; }
+.mz-kpi-card { background: var(--color-white); border: 1px solid var(--color-border); border-radius: 12px; padding: 20px 22px; display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; width: 100%; text-align: left; cursor: pointer; font: inherit; color: inherit; }
+.mz-kpi-card:hover { border-color: var(--color-primary); box-shadow: 0 6px 18px rgba(0,51,255,.08); }
+.mz-kpi-card .mz-eyebrow { margin-bottom: 12px; }
+.mz-kpi-value { font-size: 24px; font-weight: 700; letter-spacing: -0.01em; font-variant-numeric: tabular-nums; }
+.mz-kpi-hint { font-size: 12px; color: var(--color-gray); margin-top: 6px; }
+.mz-kpi-icon { flex: none; width: 38px; height: 38px; border-radius: 999px; display: flex; align-items: center; justify-content: center; }
+.mz-kpi-icon--green { background: var(--color-green-bg); color: var(--color-green); }
+.mz-kpi-icon--red { background: var(--color-red-bg); color: var(--color-red); }
+.mz-kpi-icon--purple { background: #ece9fd; color: #5b3fd9; }
+.mz-home-grid { display: grid; grid-template-columns: minmax(0,1fr) 320px; gap: 20px; align-items: start; }
+
+/* ===================== Gráfico ===================== */
+.mz-chart-card h2 { margin: 0 0 2px; font-size: 16px; }
+.mz-chart-sub { margin: 0 0 18px; font-size: 13px; color: var(--color-gray); }
+.mz-chart { display: flex; gap: 12px; }
+.mz-chart__axis { display: flex; flex-direction: column-reverse; justify-content: space-between; height: 260px; font-size: 11px; color: var(--color-gray); padding-bottom: 20px; text-align: right; }
+.mz-chart__plot { flex: 1; min-width: 0; display: flex; align-items: stretch; justify-content: space-around; height: 260px; border-left: 1px solid var(--color-border); border-bottom: 1px solid var(--color-border); padding: 0 6px; background-image: repeating-linear-gradient(to top, var(--color-border) 0, var(--color-border) 1px, transparent 1px, transparent 25%); background-size: 100% 240px; background-position: top; background-repeat: no-repeat; }
+.mz-chart__month { display: grid; grid-template-rows: 1fr 20px; align-items: end; justify-items: center; height: 100%; flex: 1; background: transparent; border: none; cursor: pointer; padding: 0; border-radius: 6px 6px 0 0; }
+.mz-chart__month:hover, .mz-chart__month.is-active { background: rgba(0,51,255,.06); }
+.mz-chart__bars { display: flex; align-items: flex-end; gap: 5px; height: 100%; }
+.mz-chart__bar { width: 22px; border-radius: 4px 4px 0 0; min-height: 2px; }
+.mz-chart__bar--entrada { background: var(--color-primary); }
+.mz-chart__bar--saida { background: var(--color-slate); }
+.mz-chart__month-label { font-size: 12px; line-height: 20px; color: var(--color-gray); }
+.mz-chart-legend { display: flex; gap: 18px; margin-top: 14px; font-size: 12px; color: var(--color-gray); flex-wrap: wrap; }
+.mz-chart-legend span { display: inline-flex; align-items: center; gap: 6px; }
+.mz-chart-legend .dot { width: 10px; height: 10px; border-radius: 3px; display: inline-block; }
+.mz-chart-legend .dot--entrada { background: var(--color-primary); }
+.mz-chart-legend .dot--saida { background: var(--color-slate); }
+.mz-chart-detail { margin-top: 14px; padding: 12px 14px; background: var(--color-table-head-bg); border-radius: 8px; font-size: 13px; display: flex; gap: 18px; flex-wrap: wrap; align-items: center; }
+.mz-chart-detail strong { font-variant-numeric: tabular-nums; }
+
+/* ===================== Listas do Início ===================== */
+.mz-conta-mini { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 12px 8px; border-bottom: 1px solid var(--color-border); width: 100%; background: transparent; border-left: none; border-right: none; border-top: none; text-align: left; cursor: pointer; font: inherit; color: inherit; border-radius: 6px; }
+.mz-conta-mini:last-child { border-bottom: none; }
+.mz-conta-mini:hover { background: #f5f6fa; }
+.mz-conta-mini__nome { font-size: 14px; font-weight: 600; }
+.mz-conta-mini__venc { font-size: 12px; color: var(--color-gray); }
+.mz-conta-mini__right { text-align: right; flex: none; }
+.mz-conta-mini__valor { font-size: 14px; font-weight: 600; margin-bottom: 4px; font-variant-numeric: tabular-nums; }
+.mz-lanc-item { display: flex; align-items: center; gap: 12px; padding: 14px 8px; border-bottom: 1px solid var(--color-border); width: 100%; background: transparent; border-left: none; border-right: none; border-top: none; text-align: left; cursor: pointer; font: inherit; color: inherit; border-radius: 6px; }
+.mz-lanc-item:last-child { border-bottom: none; }
+.mz-lanc-item:hover { background: #f5f6fa; }
+.mz-lanc-icon { flex: none; width: 34px; height: 34px; border-radius: 999px; display: flex; align-items: center; justify-content: center; }
+.mz-lanc-icon--entrada { background: var(--color-green-bg); color: var(--color-green); }
+.mz-lanc-icon--saida { background: var(--color-red-bg); color: var(--color-red); }
+.mz-lanc-desc { flex: 1; min-width: 0; font-size: 14px; }
+.mz-lanc-meta { display: block; font-size: 12px; color: var(--color-gray); }
+.mz-lanc-value { flex: none; font-weight: 700; font-size: 14px; font-variant-numeric: tabular-nums; }
+.mz-section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; gap: 12px; flex-wrap: wrap; }
+.mz-section-header h2 { margin: 0; font-size: 16px; }
+.mz-link { color: var(--color-primary); font-size: 13px; font-weight: 700; cursor: pointer; background: none; border: none; padding: 0; }
+.mz-link:hover { text-decoration: underline; }
+
+/* ===================== Toggle / tabs ===================== */
+.mz-toggle { display: inline-flex; border: 1px solid var(--color-border); border-radius: 8px; overflow: hidden; margin-bottom: 18px; }
+.mz-toggle__btn { border: none; background: var(--color-white); padding: 10px 20px; font-size: 14px; font-weight: 600; cursor: pointer; color: var(--color-gray); }
+.mz-toggle__btn.active[data-tipo="saida"] { background: var(--color-red-bg); color: var(--color-red); }
+.mz-toggle__btn.active[data-tipo="entrada"] { background: var(--color-green-bg); color: var(--color-green); }
+.mz-tabs { display: inline-flex; gap: 4px; background: #f0f1f6; border-radius: 8px; padding: 3px; flex-wrap: wrap; }
+.mz-tabs__btn { border: none; background: transparent; padding: 7px 14px; font-size: 13px; font-weight: 600; color: var(--color-gray); border-radius: 6px; cursor: pointer; }
+.mz-tabs__btn.active { background: var(--color-white); color: var(--color-black); box-shadow: 0 1px 2px rgba(0,0,0,.08); }
+.mz-dot { display: inline-block; width: 7px; height: 7px; border-radius: 999px; margin-right: 6px; }
+.mz-dot--entrada { background: var(--color-green); }
+.mz-dot--saida { background: var(--color-red); }
+
+/* ===================== Contas fixas ===================== */
+.mz-conta-row { display: flex; align-items: center; gap: 14px; padding: 16px 0; border-bottom: 1px solid var(--color-border); }
+.mz-conta-row:last-child { border-bottom: none; }
+.mz-conta-row.is-urgent { background: #fdf3f2; margin: 0 -22px; padding: 16px 22px; border-bottom-color: #f6dcd9; }
+.mz-conta-row__warn { flex: none; color: #d9534f; display: flex; align-items: center; }
+.mz-conta-row__info { flex: 1; min-width: 180px; }
+.mz-conta-row__nome { font-size: 15px; font-weight: 600; margin-bottom: 2px; }
+.mz-conta-row__venc { font-size: 13px; color: var(--color-gray); }
+.mz-conta-row__valor { flex: none; font-size: 15px; font-weight: 700; min-width: 110px; text-align: right; font-variant-numeric: tabular-nums; }
+.mz-conta-row__actions { flex: none; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; justify-content: flex-end; }
+.mz-stat-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 18px; margin-bottom: 20px; }
+.mz-stat-value { font-size: 22px; font-weight: 700; font-variant-numeric: tabular-nums; }
+
+/* ===================== Orçamentos salvos ===================== */
+.mz-orc-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; }
+.mz-orc-item { border: 1px solid var(--color-border); border-radius: 10px; padding: 16px; display: flex; flex-direction: column; gap: 10px; background: var(--color-white); }
+.mz-orc-item__nome { font-size: 15px; font-weight: 700; }
+.mz-orc-item__meta { font-size: 12px; color: var(--color-gray); }
+.mz-orc-item__nums { display: flex; justify-content: space-between; gap: 12px; font-size: 13px; padding: 10px 0; border-top: 1px dashed var(--color-border); border-bottom: 1px dashed var(--color-border); font-variant-numeric: tabular-nums; }
+.mz-orc-item__nums b { display: block; font-size: 15px; }
+.mz-orc-item__actions { display: flex; gap: 8px; flex-wrap: wrap; }
+
+/* ===================== Folha de impressão ===================== */
+.mz-print-sheet { font-size: 14px; color: #000; }
+.mz-print-sheet__head { display: flex; justify-content: space-between; gap: 16px; border-bottom: 2px solid var(--color-navy); padding-bottom: 12px; margin-bottom: 18px; flex-wrap: wrap; }
+.mz-print-sheet__empresa { font-size: 18px; font-weight: 700; }
+.mz-print-sheet__linha { display: flex; justify-content: space-between; gap: 16px; padding: 6px 0; border-bottom: 1px solid var(--color-border); }
+.mz-print-sheet__total { display: flex; justify-content: space-between; gap: 16px; margin-top: 14px; padding-top: 12px; border-top: 2px solid var(--color-navy); font-size: 17px; font-weight: 700; }
+.mz-print-sheet__rodape { margin-top: 18px; font-size: 12px; color: var(--color-gray); line-height: 1.6; }
+
+@media print {
+  body { background: #fff; }
+  .mz-topbar, .mz-sidebar, .mz-overlay, .mz-toast-wrap, .mz-no-print { display: none !important; }
+  .mz-modal-backdrop { position: static; background: none; padding: 0; display: block; }
+  .mz-modal { box-shadow: none; max-width: none; max-height: none; padding: 0; }
+  .mz-shell { display: block; }
+  .mz-content { padding: 0; }
+  body.is-printing .mz-view { display: none !important; }
+}
+
+/* ===================== Responsivo ===================== */
+@media (max-width: 960px) {
+  .mz-two-col { grid-template-columns: 1fr; }
+  .mz-kpi-grid { grid-template-columns: 1fr; }
+  .mz-home-grid { grid-template-columns: 1fr; }
+}
+@media (max-width: 900px) {
+  .mz-hamburger { display: inline-flex; align-items: center; }
+  .mz-topbar__date { display: none; }
+  .mz-sidebar { position: fixed; left: 0; top: var(--topbar-height); bottom: 0; transform: translateX(-100%); transition: transform .2s ease; z-index: 46; box-shadow: 4px 0 16px rgba(0,0,0,.12); }
+  .mz-sidebar.open { transform: translateX(0); }
+  .mz-overlay.open { display: block; }
+  .mz-content { padding: 20px 16px 48px; }
+  .mz-user__name, .mz-user__caret { display: none; }
+}
+@media (max-width: 720px) {
+  .mz-page-header { flex-direction: column; align-items: stretch; }
+  .mz-stat-grid { grid-template-columns: 1fr; }
+  .mz-conta-row { flex-wrap: wrap; }
+  .mz-conta-row__valor { text-align: left; }
+  .mz-conta-row.is-urgent { margin: 0 -16px; padding: 16px; }
+  .mz-table thead { display: none; }
+  .mz-table, .mz-table tbody, .mz-table tr, .mz-table td { display: block; width: 100%; }
+  .mz-table tbody tr { border: 1px solid var(--color-border); border-radius: 10px; margin-bottom: 12px; padding: 6px 0; }
+  .mz-table tbody td { display: flex; justify-content: space-between; align-items: center; gap: 12px; border-bottom: 1px dashed var(--color-border); text-align: right; }
+  .mz-table tbody td:last-child { border-bottom: none; }
+  .mz-table tbody td::before { content: attr(data-label); font-size: 11px; font-weight: 700; text-transform: uppercase; color: var(--color-gray); text-align: left; }
+  .mz-table tfoot, .mz-table tfoot tr, .mz-table tfoot td { display: block; width: 100%; }
+  .mz-table tfoot td { display: flex; justify-content: space-between; border-radius: 10px; }
+  .mz-row-actions { justify-content: flex-end; width: 100%; }
+  .mz-toast-wrap { left: 16px; right: 16px; }
+}
+
+/* =========================================================================
+   Movimento — camada de animação sobre o mesmo desenho
+   ========================================================================= */
+@keyframes mz-view-in { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+@keyframes mz-sobe { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+@keyframes mz-barra { from { transform: scaleY(0); } to { transform: scaleY(1); } }
+@keyframes mz-destaque { from { background: var(--color-active-bg); } to { background: transparent; } }
+@keyframes mz-toast-in { from { opacity: 0; transform: translateY(16px) scale(.97); } to { opacity: 1; transform: none; } }
+@keyframes mz-toast-out { to { opacity: 0; transform: translateY(10px) scale(.98); } }
+@keyframes mz-lateral-in { from { opacity: 0; transform: translateX(-18px); } to { opacity: 1; transform: none; } }
+@keyframes mz-topo-in { from { opacity: 0; transform: translateY(-12px); } to { opacity: 1; transform: none; } }
+
+/* entrada da tela e escalonamento dos blocos */
+.mz-anim { animation: mz-view-in .34s cubic-bezier(.2,.8,.2,1) both; }
+.mz-anim > * { animation: mz-sobe .46s cubic-bezier(.2,.8,.2,1) both; }
+.mz-anim > *:nth-child(1) { animation-delay: 30ms; }
+.mz-anim > *:nth-child(2) { animation-delay: 95ms; }
+.mz-anim > *:nth-child(3) { animation-delay: 160ms; }
+.mz-anim > *:nth-child(4) { animation-delay: 225ms; }
+.mz-anim > *:nth-child(n+5) { animation-delay: 290ms; }
+
+/* entrada do app depois do login */
+#mz-app.is-entrando .mz-sidebar { animation: mz-lateral-in .46s cubic-bezier(.2,.8,.2,1) both; }
+#mz-app.is-entrando .mz-topbar { animation: mz-topo-in .42s cubic-bezier(.2,.8,.2,1) both; }
+#view-login { transition: opacity .24s ease, transform .24s cubic-bezier(.2,.8,.2,1); }
+#view-login.is-saindo { opacity: 0; transform: scale(.985); }
+.mz-login__card { animation: mz-sobe .5s cubic-bezier(.2,.8,.2,1) both; }
+
+/* botões e controles */
+.mz-btn { transition: background .2s ease, color .2s ease, box-shadow .22s ease, transform .16s cubic-bezier(.2,.8,.2,1); }
+.mz-btn:active:not(:disabled) { transform: scale(.97); }
+.mz-btn--primary:hover:not(:disabled) { box-shadow: 0 8px 18px -10px var(--color-primary); }
+.mz-icon-btn { transition: color .18s ease, background .18s ease, transform .18s cubic-bezier(.2,.8,.2,1); border-radius: 8px; }
+.mz-icon-btn:hover { background: var(--color-active-bg); }
+.mz-icon-btn--danger:hover { background: var(--color-red-bg); }
+.mz-icon-btn:active { transform: scale(.88); }
+.mz-link, .mz-alert__link { transition: opacity .18s ease; }
+.mz-link:active, .mz-alert__link:active { opacity: .6; }
+.mz-input, .mz-select { transition: border-color .18s ease, box-shadow .18s ease; }
+.mz-tabs__btn, .mz-toggle__btn { transition: background .24s cubic-bezier(.2,.8,.2,1), color .2s ease, box-shadow .2s ease; }
+
+/* cartões e linhas */
+.mz-kpi-card { transition: border-color .2s ease, box-shadow .26s ease, transform .22s cubic-bezier(.2,.8,.2,1); }
+.mz-kpi-card:hover { transform: translateY(-3px); }
+.mz-kpi-card:active { transform: translateY(-1px) scale(.995); }
+.mz-card { transition: box-shadow .26s ease, border-color .2s ease; }
+.mz-conta-mini, .mz-lanc-item { transition: background .18s ease, transform .2s cubic-bezier(.2,.8,.2,1); border-radius: 8px; }
+.mz-conta-mini:hover, .mz-lanc-item:hover { background: #f5f6fa; transform: translateX(3px); }
+.mz-conta-row { transition: background .2s ease; }
+.mz-orc-item { transition: transform .24s cubic-bezier(.2,.8,.2,1), box-shadow .24s ease, border-color .24s ease; animation: mz-sobe .42s cubic-bezier(.2,.8,.2,1) both; }
+.mz-orc-item:hover { transform: translateY(-3px); box-shadow: 0 12px 26px -18px rgba(16,17,44,.5); border-color: var(--color-primary); }
+.mz-nav__item { transition: background .18s ease, color .18s ease, border-left-color .22s ease; }
+.mz-nav__icon { transition: transform .26s cubic-bezier(.2,.8,.2,1); }
+.mz-nav__item.active .mz-nav__icon { transform: translateX(2px); }
+.mz-avatar, .mz-logo-badge { transition: transform .26s cubic-bezier(.2,.8,.2,1); }
+.mz-user__btn:hover .mz-avatar { transform: scale(1.07); }
+.mz-bell { transition: color .2s ease, transform .2s cubic-bezier(.2,.8,.2,1); border-radius: 8px; }
+.mz-bell:hover { transform: scale(1.08); }
+
+/* tabelas */
+.mz-table tbody tr { transition: background .18s ease; }
+.mz-table tbody tr:hover { background: #f8f9fc; }
+.mz-table tbody tr.is-nova td { animation: mz-destaque 1.5s ease-out both; }
+.mz-table tbody tr.is-saindo { opacity: 0; transform: translateX(16px); transition: opacity .2s ease, transform .2s ease; }
+
+/* dropdowns com transição */
+.mz-user__dropdown, .mz-notif__panel {
+  display: block;
+  opacity: 0;
+  transform: translateY(-6px) scale(.98);
+  pointer-events: none;
+  transition: opacity .18s ease, transform .22s cubic-bezier(.2,.8,.2,1);
+}
+.mz-user.open .mz-user__dropdown, .mz-notif.open .mz-notif__panel { opacity: 1; transform: none; pointer-events: auto; }
+.mz-notif__item { transition: background .18s ease; }
+
+/* modais */
+.mz-modal-backdrop { opacity: 0; transition: opacity .2s ease; }
+.mz-modal-backdrop.is-open { opacity: 1; }
+.mz-modal { opacity: 0; transform: translateY(14px) scale(.97); transition: opacity .2s ease, transform .28s cubic-bezier(.2,.8,.2,1); }
+.mz-modal-backdrop.is-open .mz-modal { opacity: 1; transform: none; }
+
+/* avisos e toasts */
+.mz-alert { animation: mz-sobe .3s cubic-bezier(.2,.8,.2,1) both; }
+.mz-toast { animation: mz-toast-in .32s cubic-bezier(.2,.8,.2,1) both; }
+.mz-toast.is-saindo { animation: mz-toast-out .24s ease-in both; }
+
+/* gráfico */
+.mz-chart__bar { transform-origin: bottom; animation: mz-barra .62s cubic-bezier(.2,.8,.2,1) both; animation-delay: calc(var(--i, 0) * 55ms); }
+.mz-chart__month { transition: background .2s ease; }
+
+/* linhas do orçamento */
+.mz-orc-row.is-nova td { animation: mz-destaque 1.2s ease-out both; }
+.mz-orc-row.is-saindo { opacity: 0; transform: translateX(14px); transition: opacity .18s ease, transform .18s ease; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: .01ms !important;
+    animation-delay: 0ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .01ms !important;
+    scroll-behavior: auto !important;
+  }
+  .mz-kpi-card:hover, .mz-conta-mini:hover, .mz-lanc-item:hover, .mz-orc-item:hover { transform: none; }
+}
+</style>
+
+<!-- ===================== LOGIN ===================== -->
+<div id="view-login" class="mz-login">
+  <div class="mz-login__card">
+    <div class="mz-login__brand">
+      <span class="mz-logo-badge">MF</span>
+      <span class="mz-login__brand-text"><span class="mz-brand-maz">maz</span><span class="mz-brand-flow">flow</span></span>
+    </div>
+    <p class="mz-login__sub">Controle financeiro da Gráfica Mazart</p>
+
+    <div id="login-alert"></div>
+
+    <form id="login-form">
+      <div class="mz-field">
+        <label for="login-usuario">Usuário</label>
+        <input class="mz-input" type="text" id="login-usuario" value="mazart" autocomplete="username" required />
+      </div>
+      <div class="mz-field">
+        <label for="login-senha">Senha</label>
+        <input class="mz-input" type="password" id="login-senha" value="demo1234" autocomplete="current-password" required />
+      </div>
+      <div class="mz-field">
+        <label for="login-papel">Entrar como</label>
+        <select class="mz-select" id="login-papel">
+          <option value="administrador">Administrador — acesso total</option>
+          <option value="funcionario">Funcionário — sem editar materiais</option>
+        </select>
+      </div>
+      <button class="mz-btn mz-btn--primary mz-btn--block" type="submit">Entrar no sistema</button>
+    </form>
+
+    <p class="mz-login__hint">Protótipo de demonstração. Usuário <strong>mazart</strong> · senha <strong>demo1234</strong> já preenchidos.<br />Os dados ficam salvos só neste navegador.</p>
+  </div>
+</div>
+
+<!-- ===================== APP ===================== -->
+<div id="mz-app" hidden>
+  <div id="mz-topbar-root"></div>
+  <div class="mz-shell">
+    <div id="mz-sidebar-root"></div>
+
+    <main class="mz-content">
+
+      <!-- ===================== INÍCIO ===================== -->
+      <section id="view-inicio" class="mz-view">
+        <div class="mz-page-header">
+          <div>
+            <h1>Início</h1>
+            <p id="inicio-subtitulo"></p>
+          </div>
+          <div class="mz-header-actions">
+            <button class="mz-btn mz-btn--ghost" type="button" data-route="orcamentos">Novo orçamento</button>
+            <button class="mz-btn mz-btn--primary" type="button" data-route="lancamentos">+ Novo lançamento</button>
+          </div>
+        </div>
+
+        <div id="inicio-banner"></div>
+
+        <div class="mz-kpi-grid">
+          <button class="mz-kpi-card" type="button" id="kpi-card-entradas">
+            <div>
+              <p class="mz-eyebrow">Entradas Hoje</p>
+              <div class="mz-kpi-value" id="kpi-entradas-hoje">R$ 0,00</div>
+              <div class="mz-kpi-hint">Ver entradas →</div>
+            </div>
+            <span class="mz-kpi-icon mz-kpi-icon--green"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="19" x2="12" y2="5"></line><polyline points="5 12 12 5 19 12"></polyline></svg></span>
+          </button>
+          <button class="mz-kpi-card" type="button" id="kpi-card-saidas">
+            <div>
+              <p class="mz-eyebrow">Saídas Hoje</p>
+              <div class="mz-kpi-value" id="kpi-saidas-hoje">R$ 0,00</div>
+              <div class="mz-kpi-hint">Ver saídas →</div>
+            </div>
+            <span class="mz-kpi-icon mz-kpi-icon--red"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><polyline points="19 12 12 19 5 12"></polyline></svg></span>
+          </button>
+          <button class="mz-kpi-card" type="button" id="kpi-card-saldo">
+            <div>
+              <p class="mz-eyebrow">Saldo do Mês</p>
+              <div class="mz-kpi-value" id="kpi-saldo-mes">R$ 0,00</div>
+              <div class="mz-kpi-hint" id="kpi-saldo-hint">Entradas − saídas do mês</div>
+            </div>
+            <span class="mz-kpi-icon mz-kpi-icon--purple"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg></span>
+          </button>
+        </div>
+
+        <div class="mz-home-grid">
+          <div class="mz-card mz-chart-card">
+            <h2>Fluxo de Caixa — Últimos 6 Meses</h2>
+            <p class="mz-chart-sub">Entradas e saídas em R$ · clique em um mês para ver o detalhe</p>
+            <div class="mz-chart">
+              <div class="mz-chart__axis" id="chart-axis"></div>
+              <div class="mz-chart__plot" id="chart-plot"></div>
+            </div>
+            <div class="mz-chart-legend">
+              <span><span class="dot dot--entrada"></span> Entradas</span>
+              <span><span class="dot dot--saida"></span> Saídas</span>
+            </div>
+            <div class="mz-chart-detail" id="chart-detail"></div>
+          </div>
+
+          <div class="mz-card">
+            <div class="mz-section-header">
+              <h2>Contas do Mês</h2>
+              <button type="button" class="mz-link" data-route="contas">Ver todas →</button>
+            </div>
+            <div id="contas-do-mes"></div>
+          </div>
+        </div>
+
+        <div class="mz-card">
+          <div class="mz-section-header">
+            <h2>Últimos Lançamentos</h2>
+            <button type="button" class="mz-link" data-route="lancamentos">Ver todos →</button>
+          </div>
+          <div id="ultimos-lancamentos"></div>
+        </div>
+      </section>
+
+      <!-- ===================== LANÇAMENTOS ===================== -->
+      <section id="view-lancamentos" class="mz-view" hidden>
+        <div class="mz-page-header">
+          <div>
+            <h1>Lançamentos</h1>
+            <p>Registre as entradas e saídas do caixa da gráfica</p>
+          </div>
+        </div>
+
+        <div id="lancamentos-alert"></div>
+
+        <div class="mz-card">
+          <p class="mz-eyebrow" id="lanc-form-titulo">Novo Lançamento</p>
+          <div class="mz-toggle" id="lanc-toggle">
+            <button type="button" class="mz-toggle__btn active" data-tipo="saida">− Saída</button>
+            <button type="button" class="mz-toggle__btn" data-tipo="entrada">+ Entrada</button>
+          </div>
+          <form id="lanc-form">
+            <div class="mz-field-row">
+              <div class="mz-field" style="flex:2;">
+                <label for="lanc-descricao">Descrição</label>
+                <input class="mz-input" type="text" id="lanc-descricao" placeholder="Ex: impressão de banner 3x1m, compra de papel couché..." required />
+              </div>
+              <div class="mz-field">
+                <label for="lanc-valor">Valor (R$)</label>
+                <input class="mz-input" type="number" id="lanc-valor" min="0.01" step="0.01" placeholder="0,00" required />
+              </div>
+              <div class="mz-field">
+                <label for="lanc-categoria">Categoria</label>
+                <select class="mz-select" id="lanc-categoria">
+                  <option value="Impressão">Impressão</option>
+                  <option value="Acabamento">Acabamento</option>
+                  <option value="Comunicação visual">Comunicação visual</option>
+                  <option value="Material">Material</option>
+                  <option value="Manutenção">Manutenção</option>
+                  <option value="Outros">Outros</option>
+                </select>
+              </div>
+              <div class="mz-field">
+                <label for="lanc-data">Data</label>
+                <input class="mz-input" type="date" id="lanc-data" required />
+              </div>
+            </div>
+            <div class="mz-form-actions">
+              <button class="mz-btn mz-btn--primary" type="submit" id="lanc-submit">+ Registrar Lançamento</button>
+              <button class="mz-btn mz-btn--secondary mz-hidden" type="button" id="lanc-cancelar-edicao">Cancelar edição</button>
+            </div>
+          </form>
+        </div>
+
+        <div class="mz-card" style="padding:0;">
+          <div style="padding:22px 22px 0;">
+            <div class="mz-section-header">
+              <h2 id="lanc-historico-titulo">Histórico</h2>
+              <div class="mz-tabs" id="lanc-tabs">
+                <button type="button" class="mz-tabs__btn active" data-filtro="todos">Todos</button>
+                <button type="button" class="mz-tabs__btn" data-filtro="entrada">Entradas</button>
+                <button type="button" class="mz-tabs__btn" data-filtro="saida">Saídas</button>
+              </div>
+            </div>
+            <div class="mz-search" style="margin-bottom:18px;max-width:320px;">
+              <span class="mz-search__icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg></span>
+              <input class="mz-input" type="search" id="lanc-busca" placeholder="Buscar por descrição ou categoria" />
+            </div>
+          </div>
+          <div class="mz-table-wrap">
+            <table class="mz-table">
+              <thead><tr><th>Data</th><th>Descrição</th><th>Categoria</th><th class="num">Valor</th><th class="num">Ações</th></tr></thead>
+              <tbody id="lanc-tbody"></tbody>
+              <tfoot><tr><td colspan="3" data-label="Resultado">RESULTADO DO FILTRO</td><td class="num" id="lanc-total" data-label="Total">R$ 0,00</td><td></td></tr></tfoot>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===================== CONTAS FIXAS ===================== -->
+      <section id="view-contas" class="mz-view" hidden>
+        <div class="mz-page-header">
+          <div>
+            <h1>Contas Fixas</h1>
+            <p id="contas-subtitulo"></p>
+          </div>
+          <button class="mz-btn mz-btn--primary" type="button" id="btn-nova-conta">+ Nova Conta</button>
+        </div>
+
+        <div id="contas-alert"></div>
+
+        <div class="mz-stat-grid">
+          <div class="mz-card"><p class="mz-eyebrow">Total do Mês</p><div class="mz-stat-value" id="stat-total">R$ 0,00</div></div>
+          <div class="mz-card"><p class="mz-eyebrow">Pendente</p><div class="mz-stat-value mz-value--negative" id="stat-pendente">R$ 0,00</div></div>
+          <div class="mz-card"><p class="mz-eyebrow">Já Pago</p><div class="mz-stat-value mz-value--positive" id="stat-pago">R$ 0,00</div></div>
+        </div>
+
+        <div class="mz-card">
+          <div class="mz-section-header">
+            <h2 id="contas-lista-titulo">Contas</h2>
+            <div class="mz-tabs" id="contas-tabs">
+              <button type="button" class="mz-tabs__btn active" data-filtro="todas">Todas</button>
+              <button type="button" class="mz-tabs__btn" data-filtro="pendente">Pendentes</button>
+              <button type="button" class="mz-tabs__btn" data-filtro="pago">Pagas</button>
+            </div>
+          </div>
+          <div id="contas-lista"></div>
+        </div>
+      </section>
+
+      <!-- ===================== ORÇAMENTOS ===================== -->
+      <section id="view-orcamentos" class="mz-view" hidden>
+        <div class="mz-page-header">
+          <div>
+            <h1>Orçamentos</h1>
+            <p>Calcule o custo do serviço e o valor a cobrar do cliente</p>
+          </div>
+          <div class="mz-tabs" id="orc-tabs">
+            <button type="button" class="mz-tabs__btn active" data-aba="calculadora">Calculadora</button>
+            <button type="button" class="mz-tabs__btn" data-aba="salvos" id="orc-tab-salvos">Salvos</button>
+          </div>
+        </div>
+
+        <div id="orcamento-alert"></div>
+
+        <div id="orc-aba-calculadora">
+          <div class="mz-two-col">
+            <div>
+              <div class="mz-card">
+                <div class="mz-card__header">
+                  <p class="mz-eyebrow" style="margin:0;">Dados do Serviço</p>
+                  <button class="mz-btn mz-btn--secondary mz-btn--sm" type="button" id="orc-novo">Limpar e começar do zero</button>
+                </div>
+                <div class="mz-field-row">
+                  <div class="mz-field" style="flex:2;">
+                    <label for="orc-nome">Serviço</label>
+                    <input class="mz-input" type="text" id="orc-nome" placeholder="Ex: Catálogo institucional 20 páginas" />
+                  </div>
+                  <div class="mz-field">
+                    <label for="orc-cliente">Cliente</label>
+                    <input class="mz-input" type="text" id="orc-cliente" placeholder="Ex: Móveis Aurora" />
+                  </div>
+                </div>
+              </div>
+
+              <div class="mz-card">
+                <div class="mz-card__header">
+                  <p class="mz-eyebrow" style="margin:0;">Materiais Utilizados</p>
+                  <button class="mz-btn mz-btn--primary mz-btn--sm" type="button" id="orc-adicionar">+ Adicionar material</button>
+                </div>
+                <div class="mz-table-wrap">
+                  <table class="mz-table" id="orc-tabela">
+                    <thead><tr><th>Material</th><th style="width:150px;">Qtd</th><th class="num" style="width:120px;">Custo</th><th style="width:50px;"></th></tr></thead>
+                    <tbody id="orc-tbody"></tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+
+            <div>
+              <div class="mz-card">
+                <p class="mz-eyebrow" style="margin:0 0 16px;">Resumo do Orçamento</p>
+                <div class="mz-summary-row"><span class="label">Custo dos materiais</span><span class="value" id="resumo-custo">R$ 0,00</span></div>
+                <div class="mz-summary-row" style="margin-bottom:4px;"><span class="label">Margem de lucro</span><span class="value" id="resumo-margem-valor">40%</span></div>
+                <input type="range" class="mz-slider" id="orc-margem" min="10" max="80" step="1" value="40" />
+                <div class="mz-slider-labels"><span>10%</span><span>80%</span></div>
+                <div class="mz-summary-row" style="margin-top:14px;"><span class="label">Lucro estimado</span><span class="value mz-value--positive" id="resumo-lucro">R$ 0,00</span></div>
+                <div class="mz-highlight-box">
+                  <div class="label">Valor Sugerido ao Cliente</div>
+                  <div class="value" id="resumo-valor-sugerido">R$ 0,00</div>
+                </div>
+                <button class="mz-btn mz-btn--primary mz-btn--block" type="button" id="orc-salvar">✓ Salvar Orçamento</button>
+                <button class="mz-btn mz-btn--secondary mz-btn--block" type="button" style="margin-top:10px;" id="orc-exportar">Gerar PDF / Imprimir</button>
+              </div>
+              <div class="mz-card">
+                <p class="mz-eyebrow" style="margin:0 0 8px;">Data do Orçamento</p>
+                <div id="orc-data" style="font-size:15px;font-weight:600;"></div>
+                <p class="mz-kpi-hint" style="margin-top:10px;">Fórmula usada: valor = custo ÷ (1 − margem).</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div id="orc-aba-salvos" hidden>
+          <div class="mz-card">
+            <div class="mz-card__header">
+              <p class="mz-eyebrow" style="margin:0;">Orçamentos Salvos</p>
+              <button class="mz-btn mz-btn--primary mz-btn--sm" type="button" id="orc-ir-calculadora">+ Novo orçamento</button>
+            </div>
+            <div id="orc-salvos-lista" class="mz-orc-list"></div>
+          </div>
+        </div>
+
+        <template id="orc-row-template">
+          <tr class="mz-orc-row">
+            <td data-label="Material"><select class="mz-select orc-material-select"></select></td>
+            <td data-label="Qtd"><input class="mz-input orc-qtd-input" type="number" min="0.01" step="0.01" value="1" /><span class="mz-unit orc-unidade-label"></span></td>
+            <td class="num" data-label="Custo"><span class="orc-custo-label">R$ 0,00</span></td>
+            <td data-label="Remover"><button class="mz-icon-btn mz-icon-btn--danger orc-remover" type="button" title="Remover material">✕</button></td>
+          </tr>
+        </template>
+      </section>
+
+      <!-- ===================== MATERIAIS ===================== -->
+      <section id="view-materiais" class="mz-view" hidden>
+        <div class="mz-page-header">
+          <div>
+            <h1>Materiais</h1>
+            <p>Preços de papel, tinta e acabamento — base do cálculo de orçamento</p>
+          </div>
+          <div class="mz-header-actions">
+            <div class="mz-search">
+              <span class="mz-search__icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg></span>
+              <input class="mz-input" type="search" id="materiais-busca" placeholder="Buscar material" />
+            </div>
+            <button class="mz-btn mz-btn--primary mz-hidden" type="button" id="btn-novo-material">+ Novo Material</button>
+          </div>
+        </div>
+
+        <div id="materiais-alert"></div>
+
+        <div class="mz-card" style="padding:0;">
+          <div class="mz-table-wrap">
+            <table class="mz-table">
+              <thead><tr><th>Material</th><th>Unidade</th><th class="num">Preço Unit.</th><th class="num">Estoque</th><th class="num">Valor em Estoque</th><th class="num" id="col-acoes" hidden>Ações</th></tr></thead>
+              <tbody id="materiais-tbody"></tbody>
+              <tfoot><tr><td colspan="4" data-label="Total em Estoque">TOTAL EM ESTOQUE</td><td class="num" id="materiais-total" data-label="Total">R$ 0,00</td><td id="foot-acoes" hidden></td></tr></tfoot>
+            </table>
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+</div>
+
+<!-- ===================== MODAIS ===================== -->
+<div class="mz-modal-backdrop mz-hidden" id="conta-modal-backdrop">
+  <div class="mz-modal">
+    <h2>Nova Conta Fixa</h2>
+    <p class="mz-modal-sub">Cadastre uma despesa recorrente da gráfica.</p>
+    <div id="conta-modal-alert"></div>
+    <form id="conta-form">
+      <div class="mz-field">
+        <label for="conta-nome">Nome</label>
+        <input class="mz-input" type="text" id="conta-nome" placeholder="Ex: Aluguel da gráfica" required />
+      </div>
+      <div class="mz-field-row">
+        <div class="mz-field">
+          <label for="conta-valor">Valor (R$)</label>
+          <input class="mz-input" type="number" id="conta-valor" min="0.01" step="0.01" placeholder="0,00" required />
+        </div>
+        <div class="mz-field">
+          <label for="conta-vencimento">Vencimento</label>
+          <input class="mz-input" type="date" id="conta-vencimento" required />
+        </div>
+      </div>
+      <div class="mz-modal-actions">
+        <button type="button" class="mz-btn mz-btn--secondary" id="conta-modal-cancelar">Cancelar</button>
+        <button type="submit" class="mz-btn mz-btn--primary">Salvar conta</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div class="mz-modal-backdrop mz-hidden" id="material-modal-backdrop">
+  <div class="mz-modal">
+    <h2 id="material-modal-title">Novo Material</h2>
+    <p class="mz-modal-sub">Papel, tinta, toner, acabamento — tudo que entra no custo de um serviço.</p>
+    <div id="material-modal-alert"></div>
+    <form id="material-form">
+      <input type="hidden" id="material-id" />
+      <div class="mz-field">
+        <label for="material-nome">Nome</label>
+        <input class="mz-input" type="text" id="material-nome" placeholder="Ex: Papel couché brilho 170g A3" required />
+      </div>
+      <div class="mz-field-row">
+        <div class="mz-field"><label for="material-unidade">Unidade</label><input class="mz-input" type="text" id="material-unidade" placeholder="Ex: resma, folha, m², un" required /></div>
+        <div class="mz-field"><label for="material-preco">Preço Unit. (R$)</label><input class="mz-input" type="number" id="material-preco" min="0" step="0.01" placeholder="0,00" required /></div>
+      </div>
+      <div class="mz-field-row">
+        <div class="mz-field"><label for="material-estoque">Quantidade em Estoque</label><input class="mz-input" type="number" id="material-estoque" min="0" step="1" placeholder="0" required /></div>
+        <div class="mz-field"><label for="material-minimo">Estoque Mínimo</label><input class="mz-input" type="number" id="material-minimo" min="0" step="1" placeholder="0" required /></div>
+      </div>
+      <div class="mz-modal-actions">
+        <button type="button" class="mz-btn mz-btn--secondary" id="material-modal-cancelar">Cancelar</button>
+        <button type="submit" class="mz-btn mz-btn--primary">Salvar material</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div class="mz-modal-backdrop mz-hidden" id="confirm-modal-backdrop">
+  <div class="mz-modal">
+    <h2 id="confirm-title">Confirmar</h2>
+    <p class="mz-modal-sub" id="confirm-msg"></p>
+    <div class="mz-modal-actions">
+      <button type="button" class="mz-btn mz-btn--secondary" id="confirm-cancelar">Cancelar</button>
+      <button type="button" class="mz-btn mz-btn--danger" id="confirm-ok">Confirmar</button>
+    </div>
+  </div>
+</div>
+
+<div class="mz-modal-backdrop mz-hidden" id="print-modal-backdrop">
+  <div class="mz-modal mz-modal--wide">
+    <div id="print-sheet" class="mz-print-sheet"></div>
+    <div class="mz-modal-actions mz-no-print">
+      <button type="button" class="mz-btn mz-btn--secondary" id="print-fechar">Fechar</button>
+      <button type="button" class="mz-btn mz-btn--primary" id="print-imprimir">Imprimir / Salvar PDF</button>
+    </div>
+  </div>
+</div>
+
+<div class="mz-toast-wrap" id="toast-wrap"></div>
+
+<script>
+(function () {
+  "use strict";
+
+  var EMPRESA = "Gráfica Mazart";
+
+  /* =========================================================================
+     Formatação
+     ========================================================================= */
+  var fmt = (function () {
+    var MESES_ABREV = ["Jan","Fev","Mar","Abr","Mai","Jun","Jul","Ago","Set","Out","Nov","Dez"];
+    var MESES_EXTENSO = ["Janeiro","Fevereiro","Março","Abril","Maio","Junho","Julho","Agosto","Setembro","Outubro","Novembro","Dezembro"];
+    var DIAS_SEMANA = ["Domingo","Segunda-feira","Terça-feira","Quarta-feira","Quinta-feira","Sexta-feira","Sábado"];
+
+    function pad(n) { return String(n).padStart(2, "0"); }
+    function currency(v) {
+      var n = Number(v);
+      if (!isFinite(n)) n = 0;
+      return n.toLocaleString("pt-BR", { style: "currency", currency: "BRL", minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    }
+    function dateShort(date) {
+      return pad(date.getDate()) + " " + MESES_ABREV[date.getMonth()] + " " + date.getFullYear();
+    }
+    function dateLong(date) { return DIAS_SEMANA[date.getDay()] + ", " + dateShort(date); }
+    function mesAno(date) { return MESES_EXTENSO[date.getMonth()] + " " + date.getFullYear(); }
+    function milhar(v) {
+      var n = Number(v) || 0;
+      if (n >= 1000) {
+        var k = n / 1000;
+        return (Math.round(k * 10) / 10).toLocaleString("pt-BR") + "k";
+      }
+      return String(Math.round(n));
+    }
+    function escapeHtml(v) {
+      return String(v === null || v === undefined ? "" : v).replace(/[&<>"']/g, function (c) {
+        return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
+      });
+    }
+    return { pad: pad, currency: currency, dateShort: dateShort, dateLong: dateLong, mesAno: mesAno, milhar: milhar, escapeHtml: escapeHtml, MESES_ABREV: MESES_ABREV };
+  })();
+
+  /* =========================================================================
+     Datas — a demo sempre usa a data real de quem abre
+     ========================================================================= */
+  function hojeDate() { var d = new Date(); d.setHours(0, 0, 0, 0); return d; }
+  function addDias(date, n) { var d = new Date(date.getTime()); d.setDate(d.getDate() + n); return d; }
+  function toISO(date) { return date.getFullYear() + "-" + fmt.pad(date.getMonth() + 1) + "-" + fmt.pad(date.getDate()); }
+  function fromISO(iso) { var p = String(iso).split("-"); return new Date(Number(p[0]), Number(p[1]) - 1, Number(p[2])); }
+  function hojeISO() { return toISO(hojeDate()); }
+  function diasRestantes(iso) { return Math.round((fromISO(iso) - hojeDate()) / 86400000); }
+  function mesmoMes(iso, ref) { var d = fromISO(iso); return d.getMonth() === ref.getMonth() && d.getFullYear() === ref.getFullYear(); }
+
+  /* =========================================================================
+     Dados de exemplo — gráfica (papel, tinta, acabamento, comunicação visual)
+     ========================================================================= */
+  function criarSeed() {
+    var hoje = hojeDate();
+    var d = function (n) { return toISO(addDias(hoje, n)); };
+
+    return {
+      versao: 2,
+      criadoEm: hojeISO(),
+      sessao: { autenticado: false, usuario: "mazart", papel: "administrador" },
+      materiais: [
+        { id: 1,  nome: "Papel sulfite A4 75g",            unidade: "resma",    preco_unitario: 28.90,  quantidade_estoque: 24,  estoque_minimo: 10 },
+        { id: 2,  nome: "Papel sulfite A3 75g",            unidade: "resma",    preco_unitario: 56.00,  quantidade_estoque: 6,   estoque_minimo: 4 },
+        { id: 3,  nome: "Papel couché brilho 170g A3",     unidade: "folha",    preco_unitario: 0.95,   quantidade_estoque: 500, estoque_minimo: 200 },
+        { id: 4,  nome: "Papel offset 120g A4",            unidade: "resma",    preco_unitario: 42.00,  quantidade_estoque: 8,   estoque_minimo: 4 },
+        { id: 5,  nome: "Papel fotográfico glossy A4",     unidade: "folha",    preco_unitario: 1.40,   quantidade_estoque: 120, estoque_minimo: 50 },
+        { id: 6,  nome: "Toner preto (laser)",             unidade: "un",       preco_unitario: 189.00, quantidade_estoque: 2,   estoque_minimo: 3 },
+        { id: 7,  nome: "Toner colorido (kit CMY)",        unidade: "kit",      preco_unitario: 215.00, quantidade_estoque: 4,   estoque_minimo: 3 },
+        { id: 8,  nome: "Tinta eco-solvente 440ml",        unidade: "cartucho", preco_unitario: 320.00, quantidade_estoque: 3,   estoque_minimo: 4 },
+        { id: 9,  nome: "Lona front-light 440g",           unidade: "m²",       preco_unitario: 18.50,  quantidade_estoque: 45,  estoque_minimo: 20 },
+        { id: 10, nome: "Vinil adesivo branco brilho",     unidade: "m²",       preco_unitario: 22.00,  quantidade_estoque: 30,  estoque_minimo: 15 },
+        { id: 11, nome: "Laminação BOPP fosco",            unidade: "m²",       preco_unitario: 4.80,   quantidade_estoque: 60,  estoque_minimo: 25 },
+        { id: 12, nome: "Espiral 17mm preto",              unidade: "un",       preco_unitario: 1.85,   quantidade_estoque: 180, estoque_minimo: 60 },
+        { id: 13, nome: "Capa PVC transparente A4",        unidade: "un",       preco_unitario: 0.90,   quantidade_estoque: 220, estoque_minimo: 100 },
+        { id: 14, nome: "Ilhós metálico 10mm",             unidade: "un",       preco_unitario: 0.35,   quantidade_estoque: 400, estoque_minimo: 150 }
+      ],
+      contasFixas: [
+        { id: 1, nome: "Aluguel da gráfica",            valor: 3200.00, vencimento: d(3),   status: "pendente", lancamentoId: null },
+        { id: 2, nome: "Energia elétrica",              valor: 680.00,  vencimento: d(1),   status: "pendente", lancamentoId: null },
+        { id: 3, nome: "Internet fibra 500MB",          valor: 189.90,  vencimento: d(8),   status: "pendente", lancamentoId: null },
+        { id: 4, nome: "Água",                          valor: 95.00,   vencimento: d(12),  status: "pendente", lancamentoId: null },
+        { id: 5, nome: "Manutenção da plotter",         valor: 350.00,  vencimento: d(-2),  status: "pendente", lancamentoId: null },
+        { id: 6, nome: "Contador",                      valor: 520.00,  vencimento: d(-6),  status: "pago",     lancamentoId: null },
+        { id: 7, nome: "Licença CorelDRAW + RIP",       valor: 189.00,  vencimento: d(-9),  status: "pago",     lancamentoId: null }
+      ],
+      lancamentos: [
+        { id: 1,  data: d(0),  descricao: "Banner 3x1m em lona — Padaria Pão Nosso",       categoria: "Comunicação visual", tipo: "entrada", valor: 420.00 },
+        { id: 2,  data: d(0),  descricao: "Reposição de toner preto",                      categoria: "Material",           tipo: "saida",   valor: 189.00 },
+        { id: 3,  data: d(-1), descricao: "1.000 cartões de visita 4x4 — Clínica Vida",    categoria: "Impressão",          tipo: "entrada", valor: 280.00 },
+        { id: 4,  data: d(-1), descricao: "Plotagem de projeto A1 — 12 pranchas",          categoria: "Impressão",          tipo: "entrada", valor: 168.00 },
+        { id: 5,  data: d(-2), descricao: "Adesivo de vitrine 2,5 m² — Ótica Real",        categoria: "Comunicação visual", tipo: "entrada", valor: 310.00 },
+        { id: 6,  data: d(-2), descricao: "Compra de papel couché A3 — 2 pacotes",         categoria: "Material",           tipo: "saida",   valor: 190.00 },
+        { id: 7,  data: d(-3), descricao: "Encadernação espiral — 40 apostilas",           categoria: "Acabamento",         tipo: "entrada", valor: 360.00 },
+        { id: 8,  data: d(-4), descricao: "Troca de lâmina da guilhotina",                 categoria: "Manutenção",         tipo: "saida",   valor: 220.00 },
+        { id: 9,  data: d(-5), descricao: "500 envelopes timbrados — Escritório Lima",     categoria: "Impressão",          tipo: "entrada", valor: 245.00 },
+        { id: 10, data: d(-6), descricao: "Compra de lona front-light — 20 m²",            categoria: "Material",           tipo: "saida",   valor: 370.00 }
+      ],
+      historicoFluxo: [
+        { entradas: 14200, saidas: 9800 },
+        { entradas: 16400, saidas: 10300 },
+        { entradas: 12900, saidas: 9100 },
+        { entradas: 18600, saidas: 11400 },
+        { entradas: 15800, saidas: 10900 }
+      ],
+      orcamentos: [
+        {
+          id: 1,
+          nomeServico: "Catálogo institucional 20 páginas",
+          cliente: "Móveis Aurora",
+          data: d(-2),
+          margem: 45,
+          itens: [
+            { materialId: 3, quantidade: 220 },
+            { materialId: 11, quantidade: 12 },
+            { materialId: 12, quantidade: 20 },
+            { materialId: 13, quantidade: 20 }
+          ],
+          custoMateriais: 0,
+          valorSugerido: 0
+        }
+      ],
+      nextIds: { material: 15, contaFixa: 8, lancamento: 11, orcamento: 2 }
+    };
+  }
+
+  /* =========================================================================
+     Store — estado em localStorage (por navegador; é uma demo)
+     ========================================================================= */
+  var store = (function () {
+    var STORAGE_KEY = "mazflow_demo_v2";
+    var MAX_IDADE_DIAS = 15;
+
+    function persist(s) {
+      try { localStorage.setItem(STORAGE_KEY, JSON.stringify(s)); } catch (e) { /* sem storage: estado só em memória */ }
+    }
+
+    function loadState() {
+      var salvo = null;
+      try {
+        var raw = localStorage.getItem(STORAGE_KEY);
+        if (raw) salvo = JSON.parse(raw);
+      } catch (e) { salvo = null; }
+
+      var valido = salvo && salvo.versao === 2 && Array.isArray(salvo.materiais) && Array.isArray(salvo.lancamentos);
+      if (valido && salvo.criadoEm) {
+        var idade = Math.abs(diasRestantes(salvo.criadoEm));
+        if (idade > MAX_IDADE_DIAS) valido = false;
+      }
+      if (valido) return salvo;
+
+      var novo = criarSeed();
+      recalcularOrcamentosSeed(novo);
+      persist(novo);
+      return novo;
+    }
+
+    function recalcularOrcamentosSeed(s) {
+      s.orcamentos.forEach(function (o) {
+        var custo = o.itens.reduce(function (soma, item) {
+          var m = s.materiais.find(function (x) { return Number(x.id) === Number(item.materialId); });
+          return m ? soma + Number(m.preco_unitario) * Number(item.quantidade) : soma;
+        }, 0);
+        o.custoMateriais = custo;
+        o.valorSugerido = o.margem >= 100 ? custo : custo / (1 - o.margem / 100);
+      });
+    }
+
+    var state = loadState();
+    function save() { persist(state); }
+
+    function resetDemo() {
+      try { localStorage.removeItem(STORAGE_KEY); } catch (e) {}
+      state = criarSeed();
+      recalcularOrcamentosSeed(state);
+      state.sessao.autenticado = true;
+      save();
+    }
+
+    /* --- sessão --- */
+    function getSessao() { return state.sessao; }
+    function login(usuario, papel) {
+      state.sessao = { autenticado: true, usuario: usuario, papel: papel === "funcionario" ? "funcionario" : "administrador" };
+      save();
+    }
+    function logout() { state.sessao.autenticado = false; save(); }
+    function isAdmin() { return state.sessao.papel === "administrador"; }
+
+    /* --- materiais --- */
+    function getMateriais() {
+      return state.materiais.slice().sort(function (a, b) { return a.nome.localeCompare(b.nome, "pt-BR"); });
+    }
+    function getMaterial(id) { return state.materiais.find(function (m) { return Number(m.id) === Number(id); }); }
+    function isEstoqueBaixo(m) { return Number(m.quantidade_estoque) < Number(m.estoque_minimo); }
+    function materiaisEmFalta() { return getMateriais().filter(isEstoqueBaixo); }
+    function valorEmEstoque(m) { return Number(m.preco_unitario) * Number(m.quantidade_estoque); }
+    function totalEmEstoque() { return state.materiais.reduce(function (s, m) { return s + valorEmEstoque(m); }, 0); }
+    function saveMaterial(d) {
+      if (d.id) {
+        var ex = getMaterial(d.id);
+        if (ex) {
+          ex.nome = d.nome; ex.unidade = d.unidade;
+          ex.preco_unitario = Number(d.preco_unitario);
+          ex.quantidade_estoque = Number(d.quantidade_estoque);
+          ex.estoque_minimo = Number(d.estoque_minimo);
+          save(); return ex;
+        }
+      }
+      var novo = {
+        id: state.nextIds.material++, nome: d.nome, unidade: d.unidade,
+        preco_unitario: Number(d.preco_unitario),
+        quantidade_estoque: Number(d.quantidade_estoque),
+        estoque_minimo: Number(d.estoque_minimo)
+      };
+      state.materiais.push(novo); save(); return novo;
+    }
+    function deleteMaterial(id) {
+      state.materiais = state.materiais.filter(function (m) { return Number(m.id) !== Number(id); });
+      save();
+    }
+
+    /* --- contas fixas --- */
+    function getContasFixas() {
+      return state.contasFixas.slice().sort(function (a, b) { return a.vencimento.localeCompare(b.vencimento); });
+    }
+    function getContaFixa(id) { return state.contasFixas.find(function (c) { return Number(c.id) === Number(id); }); }
+    function contasPendentes() { return state.contasFixas.filter(function (c) { return c.status === "pendente"; }); }
+    function contasEmAlerta() {
+      return contasPendentes().filter(function (c) { return diasRestantes(c.vencimento) <= 3; })
+        .sort(function (a, b) { return diasRestantes(a.vencimento) - diasRestantes(b.vencimento); });
+    }
+    function marcarContaPaga(id) {
+      var c = getContaFixa(id);
+      if (!c || c.status === "pago") return null;
+      c.status = "pago";
+      var lanc = addLancamento({ data: hojeISO(), descricao: c.nome + " — conta fixa", categoria: "Outros", tipo: "saida", valor: c.valor });
+      c.lancamentoId = lanc.id;
+      save();
+      return c;
+    }
+    function desfazerPagamento(id) {
+      var c = getContaFixa(id);
+      if (!c || c.status !== "pago") return null;
+      c.status = "pendente";
+      if (c.lancamentoId) { removerLancamento(c.lancamentoId); c.lancamentoId = null; }
+      save();
+      return c;
+    }
+    function addContaFixa(d) {
+      var n = { id: state.nextIds.contaFixa++, nome: d.nome, valor: Number(d.valor), vencimento: d.vencimento, status: "pendente", lancamentoId: null };
+      state.contasFixas.push(n); save(); return n;
+    }
+    function deleteContaFixa(id) {
+      var c = getContaFixa(id);
+      if (c && c.lancamentoId) removerLancamento(c.lancamentoId);
+      state.contasFixas = state.contasFixas.filter(function (x) { return Number(x.id) !== Number(id); });
+      save();
+    }
+    function totaisContasFixas() {
+      var t = { total: 0, pendente: 0, pago: 0 };
+      state.contasFixas.forEach(function (c) {
+        t.total += Number(c.valor);
+        if (c.status === "pago") t.pago += Number(c.valor); else t.pendente += Number(c.valor);
+      });
+      return t;
+    }
+
+    /* --- lançamentos --- */
+    function getLancamentos() {
+      return state.lancamentos.slice().sort(function (a, b) {
+        return a.data !== b.data ? b.data.localeCompare(a.data) : b.id - a.id;
+      });
+    }
+    function getLancamento(id) { return state.lancamentos.find(function (l) { return Number(l.id) === Number(id); }); }
+    function addLancamento(d) {
+      var n = {
+        id: state.nextIds.lancamento++, data: d.data || hojeISO(), descricao: d.descricao,
+        categoria: d.categoria, tipo: d.tipo === "entrada" ? "entrada" : "saida", valor: Number(d.valor)
+      };
+      state.lancamentos.push(n); save(); return n;
+    }
+    function updateLancamento(id, d) {
+      var l = getLancamento(id);
+      if (!l) return null;
+      l.data = d.data; l.descricao = d.descricao; l.categoria = d.categoria;
+      l.tipo = d.tipo === "entrada" ? "entrada" : "saida"; l.valor = Number(d.valor);
+      save(); return l;
+    }
+    function removerLancamento(id) {
+      state.lancamentos = state.lancamentos.filter(function (l) { return Number(l.id) !== Number(id); });
+    }
+    function deleteLancamento(id) {
+      // se era o lançamento gerado por uma conta paga, a conta volta a pendente
+      var conta = state.contasFixas.find(function (c) { return Number(c.lancamentoId) === Number(id); });
+      if (conta) { conta.status = "pendente"; conta.lancamentoId = null; }
+      removerLancamento(id);
+      save();
+      return conta;
+    }
+    function totaisHoje() {
+      var hoje = hojeISO();
+      var t = { entradas: 0, saidas: 0 };
+      state.lancamentos.forEach(function (l) {
+        if (l.data !== hoje) return;
+        if (l.tipo === "entrada") t.entradas += Number(l.valor); else t.saidas += Number(l.valor);
+      });
+      return t;
+    }
+    function totaisDoMes(ref) {
+      var base = ref || hojeDate();
+      var t = { entradas: 0, saidas: 0 };
+      state.lancamentos.forEach(function (l) {
+        if (!mesmoMes(l.data, base)) return;
+        if (l.tipo === "entrada") t.entradas += Number(l.valor); else t.saidas += Number(l.valor);
+      });
+      return t;
+    }
+    function getSaldoMes() { var t = totaisDoMes(); return t.entradas - t.saidas; }
+
+    /* --- fluxo de caixa: 5 meses históricos + mês corrente calculado --- */
+    function getFluxoCaixa() {
+      var hoje = hojeDate();
+      var linhas = [];
+      for (var i = 5; i >= 1; i--) {
+        var ref = new Date(hoje.getFullYear(), hoje.getMonth() - i, 1);
+        var h = state.historicoFluxo[5 - i] || { entradas: 0, saidas: 0 };
+        linhas.push({ mes: fmt.MESES_ABREV[ref.getMonth()], ano: ref.getFullYear(), entradas: h.entradas, saidas: h.saidas, atual: false });
+      }
+      var t = totaisDoMes(hoje);
+      linhas.push({ mes: fmt.MESES_ABREV[hoje.getMonth()], ano: hoje.getFullYear(), entradas: t.entradas, saidas: t.saidas, atual: true });
+      return linhas;
+    }
+
+    /* --- orçamentos --- */
+    function getOrcamentos() {
+      return state.orcamentos.slice().sort(function (a, b) { return b.id - a.id; });
+    }
+    function getOrcamento(id) { return state.orcamentos.find(function (o) { return Number(o.id) === Number(id); }); }
+    function saveOrcamento(d) {
+      var n = {
+        id: state.nextIds.orcamento++, nomeServico: d.nomeServico, cliente: d.cliente, data: hojeISO(),
+        margem: Number(d.margem), itens: d.itens, custoMateriais: Number(d.custoMateriais), valorSugerido: Number(d.valorSugerido)
+      };
+      state.orcamentos.push(n); save(); return n;
+    }
+    function deleteOrcamento(id) {
+      state.orcamentos = state.orcamentos.filter(function (o) { return Number(o.id) !== Number(id); });
+      save();
+    }
+
+    return {
+      resetDemo: resetDemo,
+      getSessao: getSessao, login: login, logout: logout, isAdmin: isAdmin,
+      getMateriais: getMateriais, getMaterial: getMaterial, isEstoqueBaixo: isEstoqueBaixo, materiaisEmFalta: materiaisEmFalta,
+      valorEmEstoque: valorEmEstoque, totalEmEstoque: totalEmEstoque, saveMaterial: saveMaterial, deleteMaterial: deleteMaterial,
+      getContasFixas: getContasFixas, getContaFixa: getContaFixa, contasPendentes: contasPendentes, contasEmAlerta: contasEmAlerta,
+      marcarContaPaga: marcarContaPaga, desfazerPagamento: desfazerPagamento, addContaFixa: addContaFixa, deleteContaFixa: deleteContaFixa,
+      totaisContasFixas: totaisContasFixas,
+      getLancamentos: getLancamentos, getLancamento: getLancamento, addLancamento: addLancamento, updateLancamento: updateLancamento,
+      deleteLancamento: deleteLancamento, totaisHoje: totaisHoje, totaisDoMes: totaisDoMes, getSaldoMes: getSaldoMes, getFluxoCaixa: getFluxoCaixa,
+      getOrcamentos: getOrcamentos, getOrcamento: getOrcamento, saveOrcamento: saveOrcamento, deleteOrcamento: deleteOrcamento
+    };
+  })();
+
+  /* =========================================================================
+     UI base — toast, confirmação e modais (sem alert/confirm do navegador,
+     que o visualizador pode bloquear)
+     ========================================================================= */
+  /* =========================================================================
+     Movimento — contagem de valores e reinício de animações
+     ========================================================================= */
+  var motion = (function () {
+    var reduzida = false;
+    try { reduzida = window.matchMedia("(prefers-reduced-motion: reduce)").matches; } catch (e) {}
+
+    function tween(el, alvo, formatar) {
+      if (!el) return;
+      alvo = Number(alvo) || 0;
+      var de = Number(el.getAttribute("data-valor"));
+      if (!isFinite(de)) de = 0;
+      el.setAttribute("data-valor", String(alvo));
+      if (reduzida || de === alvo) { el.textContent = formatar(alvo); return; }
+      var token = String((Number(el.getAttribute("data-token") || 0) + 1) % 1000);
+      el.setAttribute("data-token", token);
+      var inicio = 0;
+      function passo(agora) {
+        if (el.getAttribute("data-token") !== token) return;
+        if (!inicio) inicio = agora;
+        var p = Math.min(1, (agora - inicio) / 560);
+        var e = 1 - Math.pow(1 - p, 3);
+        el.textContent = formatar(de + (alvo - de) * e);
+        if (p < 1) requestAnimationFrame(passo);
+      }
+      requestAnimationFrame(passo);
+    }
+
+    function definir(el, valor, formatar) {
+      if (!el) return;
+      el.setAttribute("data-valor", String(Number(valor) || 0));
+      el.textContent = formatar(valor);
+    }
+
+    function reanimar(el, classe) {
+      if (!el) return;
+      el.classList.remove(classe);
+      void el.offsetWidth;
+      el.classList.add(classe);
+    }
+
+    return { reduzida: reduzida, tween: tween, definir: definir, reanimar: reanimar };
+  })();
+
+  var ui = (function () {
+    function toast(msg, tipo) {
+      var wrap = document.getElementById("toast-wrap");
+      var el = document.createElement("div");
+      el.className = "mz-toast" + (tipo ? " mz-toast--" + tipo : "");
+      el.innerHTML = '<span class="mz-toast__mark"></span><span></span>';
+      el.lastChild.textContent = msg;
+      wrap.appendChild(el);
+      window.setTimeout(function () {
+        el.classList.add("is-saindo");
+        window.setTimeout(function () { if (el.parentNode) el.parentNode.removeChild(el); }, motion.reduzida ? 0 : 260);
+      }, 3900);
+    }
+
+    var confirmAcao = null;
+    function confirmar(titulo, msg, onOk, textoOk) {
+      document.getElementById("confirm-title").textContent = titulo;
+      document.getElementById("confirm-msg").textContent = msg;
+      document.getElementById("confirm-ok").textContent = textoOk || "Confirmar";
+      confirmAcao = onOk;
+      abrirModal("confirm-modal-backdrop");
+    }
+
+    function abrirModal(id) {
+      var el = document.getElementById(id);
+      el.classList.remove("mz-hidden");
+      requestAnimationFrame(function () { el.classList.add("is-open"); });
+    }
+    function fecharModal(id) {
+      var el = document.getElementById(id);
+      if (el.classList.contains("mz-hidden")) return;
+      el.classList.remove("is-open");
+      window.setTimeout(function () { el.classList.add("mz-hidden"); }, motion.reduzida ? 0 : 210);
+    }
+    function fecharTodosModais() {
+      ["conta-modal-backdrop", "material-modal-backdrop", "confirm-modal-backdrop", "print-modal-backdrop"].forEach(fecharModal);
+    }
+
+    function alerta(containerId, msg, tipo) {
+      var box = document.getElementById(containerId);
+      if (!box) return;
+      box.innerHTML = '<div class="mz-alert mz-alert--' + (tipo || "success") + '"></div>';
+      box.firstChild.textContent = msg;
+    }
+    function limparAlerta(containerId) {
+      var box = document.getElementById(containerId);
+      if (box) box.innerHTML = "";
+    }
+
+    function init() {
+      document.getElementById("confirm-cancelar").addEventListener("click", function () { fecharModal("confirm-modal-backdrop"); });
+      document.getElementById("confirm-ok").addEventListener("click", function () {
+        fecharModal("confirm-modal-backdrop");
+        if (typeof confirmAcao === "function") confirmAcao();
+        confirmAcao = null;
+      });
+      document.querySelectorAll(".mz-modal-backdrop").forEach(function (bd) {
+        bd.addEventListener("click", function (ev) { if (ev.target === bd) fecharModal(bd.id); });
+      });
+      document.addEventListener("keydown", function (ev) {
+        if (ev.key === "Escape") fecharTodosModais();
+      });
+    }
+
+    return { toast: toast, confirmar: confirmar, abrirModal: abrirModal, fecharModal: fecharModal, alerta: alerta, limparAlerta: limparAlerta, init: init };
+  })();
+
+  /* =========================================================================
+     Ícones
+     ========================================================================= */
+  var ICONS = {
+    grid: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>',
+    plus: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>',
+    list: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><line x1="3" y1="6" x2="3.01" y2="6"></line><line x1="3" y1="12" x2="3.01" y2="12"></line><line x1="3" y1="18" x2="3.01" y2="18"></line></svg>',
+    edit: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>',
+    tag: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.59 13.41 13.42 20.6a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path><line x1="7" y1="7" x2="7.01" y2="7"></line></svg>',
+    logout: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>',
+    bell: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>',
+    entrada: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="19" x2="12" y2="5"></line><polyline points="5 12 12 5 19 12"></polyline></svg>',
+    saida: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><polyline points="19 12 12 19 5 12"></polyline></svg>',
+    warn: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>',
+    editSm: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>',
+    trash: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"></path><path d="M10 11v6"></path><path d="M14 11v6"></path><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"></path></svg>'
+  };
+
+  var MENU = [
+    { key: "inicio", label: "Início", icon: "grid" },
+    { key: "lancamentos", label: "Lançamentos", icon: "plus" },
+    { key: "contas", label: "Contas Fixas", icon: "list", badge: "contas" },
+    { key: "orcamentos", label: "Orçamentos", icon: "edit" },
+    { key: "materiais", label: "Materiais", icon: "tag", badge: "estoque" }
+  ];
+
+  /* =========================================================================
+     Layout — topbar, notificações e menu lateral
+     ========================================================================= */
+  var layout = (function () {
+    function iniciais(texto) {
+      return texto.split(" ").filter(Boolean).slice(0, 2).map(function (p) { return p.charAt(0).toUpperCase(); }).join("");
+    }
+
+    function alertas() {
+      var itens = [];
+      store.contasEmAlerta().forEach(function (c) {
+        var dias = diasRestantes(c.vencimento);
+        var quando = dias < 0 ? "vencida há " + Math.abs(dias) + (Math.abs(dias) === 1 ? " dia" : " dias")
+          : dias === 0 ? "vence hoje" : "vence em " + dias + (dias === 1 ? " dia" : " dias");
+        itens.push({ tipo: dias <= 0 ? "danger" : "warning", titulo: c.nome, meta: quando + " · " + fmt.currency(c.valor), rota: "contas" });
+      });
+      store.materiaisEmFalta().forEach(function (m) {
+        itens.push({ tipo: "warning", titulo: m.nome, meta: "estoque baixo: " + m.quantidade_estoque + " " + m.unidade + " (mínimo " + m.estoque_minimo + ")", rota: "materiais" });
+      });
+      return itens;
+    }
+
+    function renderTopbar() {
+      var root = document.getElementById("mz-topbar-root");
+      var sessao = store.getSessao();
+      var lista = alertas();
+
+      var notifHtml = lista.length
+        ? lista.map(function (a, i) {
+            return '<button class="mz-notif__item" type="button" data-notif="' + i + '" data-rota="' + a.rota + '">' +
+              '<span class="mz-notif__dot mz-notif__dot--' + a.tipo + '"></span><span>' +
+              '<span class="mz-notif__title">' + fmt.escapeHtml(a.titulo) + "</span>" +
+              '<span class="mz-notif__meta">' + fmt.escapeHtml(a.meta) + "</span></span></button>";
+          }).join("")
+        : '<div class="mz-empty" style="padding:24px 12px;">Nenhum alerta no momento.</div>';
+
+      root.innerHTML =
+        '<header class="mz-topbar">' +
+          '<button class="mz-hamburger" type="button" id="mz-hamburger" aria-label="Abrir menu">☰</button>' +
+          '<div class="mz-topbar__brand"><span class="mz-logo-badge">MF</span>' +
+            '<span class="mz-brand-text"><span class="mz-brand-maz">maz</span><span class="mz-brand-flow">flow</span></span></div>' +
+          '<div class="mz-topbar__right">' +
+            '<span class="mz-topbar__date">' + fmt.dateShort(hojeDate()) + "</span>" +
+            '<div class="mz-notif" id="mz-notif">' +
+              '<button class="mz-bell" type="button" id="mz-bell" aria-label="Notificações">' + ICONS.bell +
+                (lista.length ? '<span class="mz-badge mz-badge--bell">' + lista.length + "</span>" : "") +
+              "</button>" +
+              '<div class="mz-notif__panel"><div class="mz-notif__head">Alertas (' + lista.length + ")</div>" + notifHtml + "</div>" +
+            "</div>" +
+            '<div class="mz-user" id="mz-user"><button class="mz-user__btn" type="button" id="mz-user-btn">' +
+              '<span class="mz-avatar">' + iniciais(EMPRESA) + '</span><span class="mz-user__name">' + fmt.escapeHtml(EMPRESA) + '</span><span class="mz-user__caret">▾</span></button>' +
+              '<div class="mz-user__dropdown">' +
+                '<div class="mz-user__info"><strong>' + fmt.escapeHtml(sessao.usuario) + "</strong>" +
+                  "<span>" + (sessao.papel === "administrador" ? "Administrador" : "Funcionário") + " · " + fmt.escapeHtml(EMPRESA) + "</span></div>" +
+                '<button type="button" class="mz-menu-item" id="mz-trocar-papel">Trocar de perfil</button>' +
+                '<button type="button" class="mz-menu-item mz-menu-item--danger" id="mz-logout-dropdown">Sair do sistema</button>' +
+              "</div></div>" +
+          "</div></header>";
+
+      document.getElementById("mz-user-btn").addEventListener("click", function (ev) {
+        ev.stopPropagation();
+        document.getElementById("mz-notif").classList.remove("open");
+        document.getElementById("mz-user").classList.toggle("open");
+      });
+      document.getElementById("mz-bell").addEventListener("click", function (ev) {
+        ev.stopPropagation();
+        document.getElementById("mz-user").classList.remove("open");
+        document.getElementById("mz-notif").classList.toggle("open");
+      });
+      root.querySelectorAll("[data-notif]").forEach(function (btn) {
+        btn.addEventListener("click", function () {
+          document.getElementById("mz-notif").classList.remove("open");
+          router.goto(btn.getAttribute("data-rota"));
+        });
+      });
+      document.getElementById("mz-trocar-papel").addEventListener("click", function () {
+        document.getElementById("mz-user").classList.remove("open");
+        var novo = store.isAdmin() ? "funcionario" : "administrador";
+        store.login(store.getSessao().usuario, novo);
+        ui.toast("Perfil alterado para " + (novo === "administrador" ? "Administrador" : "Funcionário") + ".", "info");
+        router.show(router.current);
+      });
+      document.getElementById("mz-logout-dropdown").addEventListener("click", function () {
+        document.getElementById("mz-user").classList.remove("open");
+        sair();
+      });
+      document.getElementById("mz-hamburger").addEventListener("click", function () { toggleSidebar(); });
+    }
+
+    function toggleSidebar(force) {
+      var sidebar = document.getElementById("mz-sidebar-inner");
+      var overlay = document.getElementById("mz-overlay");
+      if (!sidebar || !overlay) return;
+      var abrir = force !== undefined ? force : !sidebar.classList.contains("open");
+      sidebar.classList.toggle("open", abrir);
+      overlay.classList.toggle("open", abrir);
+    }
+
+    function renderSidebar(ativa) {
+      var root = document.getElementById("mz-sidebar-root");
+      var pendentes = store.contasPendentes().length;
+      var emFalta = store.materiaisEmFalta().length;
+
+      var itens = MENU.map(function (item) {
+        var valor = item.badge === "contas" ? pendentes : item.badge === "estoque" ? emFalta : 0;
+        var badge = valor
+          ? '<span class="mz-nav__badge' + (item.badge === "estoque" ? " mz-nav__badge--danger" : "") + '">' + valor + "</span>"
+          : "";
+        return '<a class="mz-nav__item' + (item.key === ativa ? " active" : "") + '" href="#/' + item.key + '" data-route="' + item.key + '">' +
+          '<span class="mz-nav__icon">' + ICONS[item.icon] + '</span><span class="mz-nav__label">' + item.label + "</span>" + badge + "</a>";
+      }).join("");
+
+      root.innerHTML =
+        '<div class="mz-overlay" id="mz-overlay"></div>' +
+        '<aside class="mz-sidebar" id="mz-sidebar-inner">' +
+          '<nav class="mz-nav">' + itens + "</nav>" +
+          "<div>" +
+            '<button class="mz-logout-btn" type="button" id="mz-logout-sidebar">' + ICONS.logout + "<span>Sair</span></button>" +
+            '<button class="mz-reset-demo" type="button" id="mz-reset-demo">↺ Resetar dados da demonstração</button>' +
+          "</div></aside>";
+
+      var reset = document.getElementById("mz-reset-demo");
+
+      document.getElementById("mz-logout-sidebar").addEventListener("click", sair);
+      document.getElementById("mz-overlay").addEventListener("click", function () { toggleSidebar(false); });
+      if (reset) {
+        reset.addEventListener("click", function () {
+          ui.confirmar(
+            "Resetar demonstração",
+            "Isto apaga os lançamentos, contas e orçamentos criados durante a demonstração e volta aos dados de exemplo. Continuar?",
+            function () {
+              store.resetDemo();
+              ui.toast("Dados de exemplo restaurados.", "info");
+              router.goto("inicio");
+            },
+            "Resetar"
+          );
+        });
+      }
+    }
+
+    function sair() {
+      ui.confirmar("Sair do sistema", "Você voltará para a tela de login. Os dados da demonstração continuam salvos neste navegador.", function () {
+        store.logout();
+        auth.mostrarLogin();
+      }, "Sair");
+    }
+
+    function refresh(ativa) { renderTopbar(); renderSidebar(ativa); }
+
+    return { refresh: refresh, toggleSidebar: toggleSidebar };
+  })();
+
+  /* =========================================================================
+     Autenticação
+     ========================================================================= */
+  var auth = (function () {
+    function mostrarLogin() {
+      document.getElementById("mz-app").hidden = true;
+      document.getElementById("view-login").hidden = false;
+      document.getElementById("view-login").classList.remove("is-saindo");
+      ui.limparAlerta("login-alert");
+      document.getElementById("login-papel").value = store.getSessao().papel || "administrador";
+      window.scrollTo({ top: 0 });
+    }
+
+    function mostrarApp() {
+      var login = document.getElementById("view-login");
+      var app = document.getElementById("mz-app");
+      function trocar() {
+        login.hidden = true;
+        login.classList.remove("is-saindo");
+        app.hidden = false;
+        app.classList.add("is-entrando");
+        router.show(router.current || "inicio");
+        window.setTimeout(function () { app.classList.remove("is-entrando"); }, 700);
+      }
+      if (motion.reduzida || login.hidden) { trocar(); return; }
+      login.classList.add("is-saindo");
+      window.setTimeout(trocar, 230);
+    }
+
+    function init() {
+      document.getElementById("login-form").addEventListener("submit", function (ev) {
+        ev.preventDefault();
+        var usuario = document.getElementById("login-usuario").value.trim();
+        var senha = document.getElementById("login-senha").value;
+        var papel = document.getElementById("login-papel").value;
+        if (!usuario || !senha) {
+          ui.alerta("login-alert", "Informe usuário e senha para entrar.", "error");
+          return;
+        }
+        if (senha.length < 4) {
+          ui.alerta("login-alert", "A senha precisa ter pelo menos 4 caracteres.", "error");
+          return;
+        }
+        store.login(usuario, papel);
+        ui.limparAlerta("login-alert");
+        mostrarApp();
+        ui.toast("Bem-vindo, " + usuario + "!", "info");
+      });
+
+      if (store.getSessao().autenticado) mostrarApp(); else mostrarLogin();
+    }
+
+    return { init: init, mostrarLogin: mostrarLogin, mostrarApp: mostrarApp };
+  })();
+
+  /* =========================================================================
+     Router
+     ========================================================================= */
+  var router = {
+    views: ["inicio", "lancamentos", "contas", "orcamentos", "materiais"],
+    current: "inicio",
+    params: {},
+    show: function (view, params) {
+      if (router.views.indexOf(view) === -1) view = "inicio";
+      if (!store.getSessao().autenticado) { auth.mostrarLogin(); return; }
+      router.params = params || router.params || {};
+      router.views.forEach(function (v) {
+        document.getElementById("view-" + v).hidden = v !== view;
+      });
+      router.current = view;
+      layout.refresh(view);
+      motion.reanimar(document.getElementById("view-" + view), "mz-anim");
+      if (view === "inicio") viewInicio.render();
+      if (view === "lancamentos") viewLancamentos.render(router.params);
+      if (view === "contas") viewContas.render();
+      if (view === "orcamentos") viewOrcamentos.render(router.params);
+      if (view === "materiais") viewMateriais.render();
+      router.params = {};
+      window.scrollTo({ top: 0, behavior: motion.reduzida ? "auto" : "smooth" });
+    },
+    goto: function (view, params) {
+      router.params = params || {};
+      var hash = "#/" + view;
+      if (window.location.hash === hash) router.show(view, params);
+      else window.location.hash = hash;
+    },
+    init: function () {
+      if (router._inited) return;
+      router._inited = true;
+
+      document.addEventListener("click", function (ev) {
+        var alvo = ev.target.closest("[data-route]");
+        if (alvo) {
+          ev.preventDefault();
+          layout.toggleSidebar(false);
+          router.goto(alvo.getAttribute("data-route"));
+          return;
+        }
+        var user = document.getElementById("mz-user");
+        var notif = document.getElementById("mz-notif");
+        if (user && !user.contains(ev.target)) user.classList.remove("open");
+        if (notif && !notif.contains(ev.target)) notif.classList.remove("open");
+      });
+
+      window.addEventListener("hashchange", function () {
+        router.show((window.location.hash || "").replace("#/", "") || "inicio", router.params);
+      });
+
+      router.current = (window.location.hash || "").replace("#/", "") || "inicio";
+      if (router.views.indexOf(router.current) === -1) router.current = "inicio";
+    }
+  };
+
+  /* =========================================================================
+     View: Início
+     ========================================================================= */
+  var viewInicio = (function () {
+    var iniciado = false;
+    var mesSelecionado = null;
+
+    function renderBanner() {
+      var box = document.getElementById("inicio-banner");
+      var alertas = store.contasEmAlerta();
+      if (!alertas.length) { box.innerHTML = ""; return; }
+      var nomes = alertas.map(function (c) { return c.nome; }).join(", ");
+      var vencidas = alertas.filter(function (c) { return diasRestantes(c.vencimento) < 0; }).length;
+      var texto = vencidas
+        ? vencidas + (vencidas > 1 ? " contas vencidas" : " conta vencida") + " e " + (alertas.length - vencidas) + " vencendo em até 3 dias:"
+        : alertas.length + (alertas.length > 1 ? " contas vencem" : " conta vence") + " nos próximos 3 dias:";
+      box.innerHTML =
+        '<div class="mz-alert mz-alert--warning"><span class="mz-alert__text">' + ICONS.warn +
+        "<span><strong>" + fmt.escapeHtml(texto) + "</strong> " + fmt.escapeHtml(nomes) + "</span></span>" +
+        '<button type="button" class="mz-alert__link" data-route="contas">Ver contas →</button></div>';
+    }
+
+    function renderKpis() {
+      var hoje = store.totaisHoje();
+      var mes = store.totaisDoMes();
+      var saldo = mes.entradas - mes.saidas;
+      motion.tween(document.getElementById("kpi-entradas-hoje"), hoje.entradas, fmt.currency);
+      motion.tween(document.getElementById("kpi-saidas-hoje"), hoje.saidas, fmt.currency);
+      var elSaldo = document.getElementById("kpi-saldo-mes");
+      motion.tween(elSaldo, saldo, fmt.currency);
+      elSaldo.className = "mz-kpi-value " + (saldo < 0 ? "mz-value--negative" : "mz-value--positive");
+      document.getElementById("kpi-saldo-hint").textContent =
+        fmt.currency(mes.entradas) + " em entradas − " + fmt.currency(mes.saidas) + " em saídas";
+    }
+
+    function renderChart() {
+      var dados = store.getFluxoCaixa();
+      var maior = dados.reduce(function (m, l) { return Math.max(m, l.entradas, l.saidas); }, 0);
+      var escala = Math.max(4000, Math.ceil(maior / 4000) * 4000);
+
+      var axis = [];
+      for (var i = 4; i >= 0; i--) axis.push("<span>" + fmt.milhar((escala * i) / 4) + "</span>");
+      document.getElementById("chart-axis").innerHTML = axis.reverse().join("");
+
+      if (mesSelecionado === null || mesSelecionado >= dados.length) mesSelecionado = dados.length - 1;
+
+      document.getElementById("chart-plot").innerHTML = dados.map(function (linha, idx) {
+        var pe = Math.min(100, (linha.entradas / escala) * 100);
+        var ps = Math.min(100, (linha.saidas / escala) * 100);
+        return '<button class="mz-chart__month' + (idx === mesSelecionado ? " is-active" : "") + '" type="button" data-mes="' + idx + '">' +
+          '<span class="mz-chart__bars">' +
+            '<span class="mz-chart__bar mz-chart__bar--entrada" style="height:' + pe + "%;--i:" + idx + '"></span>' +
+            '<span class="mz-chart__bar mz-chart__bar--saida" style="height:' + ps + "%;--i:" + idx + '"></span>' +
+          "</span>" +
+          '<span class="mz-chart__month-label">' + linha.mes + "</span></button>";
+      }).join("");
+
+      document.getElementById("chart-plot").querySelectorAll("[data-mes]").forEach(function (btn) {
+        btn.addEventListener("click", function () {
+          mesSelecionado = Number(btn.getAttribute("data-mes"));
+          renderChart();
+        });
+      });
+
+      var sel = dados[mesSelecionado];
+      var saldo = sel.entradas - sel.saidas;
+      document.getElementById("chart-detail").innerHTML =
+        "<span><strong>" + sel.mes + "/" + sel.ano + "</strong>" + (sel.atual ? " (mês atual)" : "") + "</span>" +
+        "<span>Entradas: <strong>" + fmt.currency(sel.entradas) + "</strong></span>" +
+        "<span>Saídas: <strong>" + fmt.currency(sel.saidas) + "</strong></span>" +
+        '<span>Saldo: <strong class="' + (saldo < 0 ? "mz-value--negative" : "mz-value--positive") + '">' + fmt.currency(saldo) + "</strong></span>";
+    }
+
+    function renderContasDoMes() {
+      var box = document.getElementById("contas-do-mes");
+      var contas = store.getContasFixas();
+      if (!contas.length) { box.innerHTML = '<div class="mz-empty">Nenhuma conta cadastrada.</div>'; return; }
+      box.innerHTML = contas.map(function (c) {
+        var tag;
+        if (c.status === "pago") tag = '<span class="mz-tag mz-tag--success">Pago</span>';
+        else {
+          var dias = diasRestantes(c.vencimento);
+          if (dias < 0) tag = '<span class="mz-tag mz-tag--danger">Vencida</span>';
+          else if (dias <= 3) tag = '<span class="mz-tag mz-tag--warning">' + (dias === 0 ? "hoje" : dias + "d") + "</span>";
+          else tag = '<span class="mz-tag mz-tag--neutral">' + dias + "d</span>";
+        }
+        var venc = fromISO(c.vencimento);
+        return '<button class="mz-conta-mini" type="button" data-route="contas">' +
+          '<span><span class="mz-conta-mini__nome">' + fmt.escapeHtml(c.nome) + "</span>" +
+          '<span class="mz-conta-mini__venc">vence ' + fmt.pad(venc.getDate()) + " " + fmt.MESES_ABREV[venc.getMonth()] + "</span></span>" +
+          '<span class="mz-conta-mini__right"><span class="mz-conta-mini__valor">' + fmt.currency(c.valor) + "</span>" + tag + "</span></button>";
+      }).join("");
+    }
+
+    function renderUltimos() {
+      var box = document.getElementById("ultimos-lancamentos");
+      var lista = store.getLancamentos().slice(0, 6);
+      if (!lista.length) { box.innerHTML = '<div class="mz-empty">Nenhum lançamento registrado ainda.</div>'; return; }
+      box.innerHTML = lista.map(function (l) {
+        var entrada = l.tipo === "entrada";
+        var data = fromISO(l.data);
+        return '<button class="mz-lanc-item" type="button" data-lanc="' + l.id + '">' +
+          '<span class="mz-lanc-icon mz-lanc-icon--' + l.tipo + '">' + (entrada ? ICONS.entrada : ICONS.saida) + "</span>" +
+          '<span class="mz-lanc-desc">' + fmt.escapeHtml(l.descricao) +
+            '<span class="mz-lanc-meta">' + fmt.pad(data.getDate()) + " " + fmt.MESES_ABREV[data.getMonth()] + " · " + fmt.escapeHtml(l.categoria) + "</span></span>" +
+          '<span class="mz-lanc-value mz-value--' + (entrada ? "positive" : "negative") + '">' + (entrada ? "+" : "−") + fmt.currency(l.valor) + "</span></button>";
+      }).join("");
+
+      box.querySelectorAll("[data-lanc]").forEach(function (btn) {
+        btn.addEventListener("click", function () {
+          router.goto("lancamentos", { editar: Number(btn.getAttribute("data-lanc")) });
+        });
+      });
+    }
+
+    function init() {
+      if (iniciado) return;
+      iniciado = true;
+      document.getElementById("kpi-card-entradas").addEventListener("click", function () { router.goto("lancamentos", { filtro: "entrada" }); });
+      document.getElementById("kpi-card-saidas").addEventListener("click", function () { router.goto("lancamentos", { filtro: "saida" }); });
+      document.getElementById("kpi-card-saldo").addEventListener("click", function () { router.goto("lancamentos", { filtro: "todos" }); });
+    }
+
+    function render() {
+      init();
+      document.getElementById("inicio-subtitulo").textContent = fmt.dateLong(hojeDate()) + " · " + EMPRESA;
+      renderBanner(); renderKpis(); renderChart(); renderContasDoMes(); renderUltimos();
+    }
+
+    return { render: render };
+  })();
+
+  /* =========================================================================
+     View: Lançamentos
+     ========================================================================= */
+  var viewLancamentos = (function () {
+    var tipoAtual = "saida";
+    var filtroAtual = "todos";
+    var busca = "";
+    var editandoId = null;
+    var destacarId = null;
+    var iniciado = false;
+
+    function setTipo(tipo) {
+      tipoAtual = tipo === "entrada" ? "entrada" : "saida";
+      document.querySelectorAll("#lanc-toggle .mz-toggle__btn").forEach(function (b) {
+        b.classList.toggle("active", b.getAttribute("data-tipo") === tipoAtual);
+      });
+    }
+
+    function setFiltro(filtro) {
+      filtroAtual = ["todos", "entrada", "saida"].indexOf(filtro) === -1 ? "todos" : filtro;
+      document.querySelectorAll("#lanc-tabs .mz-tabs__btn").forEach(function (b) {
+        b.classList.toggle("active", b.getAttribute("data-filtro") === filtroAtual);
+      });
+    }
+
+    function limparEdicao() {
+      editandoId = null;
+      document.getElementById("lanc-form").reset();
+      document.getElementById("lanc-data").value = hojeISO();
+      document.getElementById("lanc-form-titulo").textContent = "Novo Lançamento";
+      document.getElementById("lanc-submit").textContent = "+ Registrar Lançamento";
+      document.getElementById("lanc-cancelar-edicao").classList.add("mz-hidden");
+      setTipo("saida");
+      renderTabela();
+    }
+
+    function editar(id) {
+      var l = store.getLancamento(id);
+      if (!l) { ui.toast("Lançamento não encontrado.", "error"); return; }
+      editandoId = l.id;
+      document.getElementById("lanc-descricao").value = l.descricao;
+      document.getElementById("lanc-valor").value = l.valor;
+      document.getElementById("lanc-categoria").value = l.categoria;
+      document.getElementById("lanc-data").value = l.data;
+      setTipo(l.tipo);
+      document.getElementById("lanc-form-titulo").textContent = "Editando lançamento";
+      document.getElementById("lanc-submit").textContent = "Salvar alterações";
+      document.getElementById("lanc-cancelar-edicao").classList.remove("mz-hidden");
+      renderTabela();
+      document.getElementById("lanc-descricao").focus();
+    }
+
+    function listaFiltrada() {
+      var termo = busca.trim().toLowerCase();
+      return store.getLancamentos().filter(function (l) {
+        if (filtroAtual !== "todos" && l.tipo !== filtroAtual) return false;
+        if (!termo) return true;
+        return (l.descricao + " " + l.categoria).toLowerCase().indexOf(termo) !== -1;
+      });
+    }
+
+    function renderTabela() {
+      var tbody = document.getElementById("lanc-tbody");
+      var lista = listaFiltrada();
+      var total = lista.reduce(function (s, l) { return s + (l.tipo === "entrada" ? Number(l.valor) : -Number(l.valor)); }, 0);
+
+      var elTotal = document.getElementById("lanc-total");
+      motion.tween(elTotal, total, fmt.currency);
+      elTotal.className = "num " + (total < 0 ? "mz-value--negative" : "mz-value--positive");
+
+      if (!lista.length) {
+        tbody.innerHTML = '<tr><td colspan="5"><div class="mz-empty">Nenhum lançamento encontrado com esse filtro.</div></td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = lista.map(function (l) {
+        var entrada = l.tipo === "entrada";
+        var classes = [];
+        if (Number(l.id) === Number(editandoId)) classes.push("is-editing");
+        if (Number(l.id) === Number(destacarId)) classes.push("is-nova");
+        return "<tr" + (classes.length ? ' class="' + classes.join(" ") + '"' : "") + ">" +
+          '<td data-label="Data">' + fmt.dateShort(fromISO(l.data)) + "</td>" +
+          '<td data-label="Descrição"><span class="mz-dot mz-dot--' + l.tipo + '"></span>' + fmt.escapeHtml(l.descricao) + "</td>" +
+          '<td data-label="Categoria">' + fmt.escapeHtml(l.categoria) + "</td>" +
+          '<td class="num mz-value--' + (entrada ? "positive" : "negative") + '" data-label="Valor">' + (entrada ? "+" : "−") + fmt.currency(l.valor) + "</td>" +
+          '<td class="num" data-label="Ações"><span class="mz-row-actions">' +
+            '<button class="mz-icon-btn" type="button" title="Editar" data-editar="' + l.id + '">' + ICONS.editSm + "</button>" +
+            '<button class="mz-icon-btn mz-icon-btn--danger" type="button" title="Excluir" data-excluir="' + l.id + '">' + ICONS.trash + "</button>" +
+          "</span></td></tr>";
+      }).join("");
+
+      destacarId = null;
+
+      tbody.querySelectorAll("[data-editar]").forEach(function (btn) {
+        btn.addEventListener("click", function () { editar(Number(btn.getAttribute("data-editar"))); });
+      });
+      tbody.querySelectorAll("[data-excluir]").forEach(function (btn) {
+        btn.addEventListener("click", function () {
+          var id = Number(btn.getAttribute("data-excluir"));
+          var l = store.getLancamento(id);
+          ui.confirmar("Excluir lançamento", "Excluir “" + (l ? l.descricao : "") + "”? Essa ação não pode ser desfeita.", function () {
+            var linha = btn.closest("tr");
+            if (linha && !motion.reduzida) linha.classList.add("is-saindo");
+            window.setTimeout(function () {
+              var conta = store.deleteLancamento(id);
+              if (Number(editandoId) === id) limparEdicao();
+              ui.toast(conta ? "Lançamento excluído. A conta “" + conta.nome + "” voltou para pendente." : "Lançamento excluído.", "info");
+              renderTabela();
+              layout.refresh(router.current);
+            }, motion.reduzida ? 0 : 200);
+          }, "Excluir");
+        });
+      });
+    }
+
+    function init() {
+      if (iniciado) return;
+      iniciado = true;
+
+      document.getElementById("lanc-data").value = hojeISO();
+
+      document.getElementById("lanc-toggle").addEventListener("click", function (ev) {
+        var btn = ev.target.closest(".mz-toggle__btn");
+        if (btn) setTipo(btn.getAttribute("data-tipo"));
+      });
+
+      document.getElementById("lanc-tabs").addEventListener("click", function (ev) {
+        var btn = ev.target.closest(".mz-tabs__btn");
+        if (!btn) return;
+        setFiltro(btn.getAttribute("data-filtro"));
+        renderTabela();
+      });
+
+      document.getElementById("lanc-busca").addEventListener("input", function (ev) {
+        busca = ev.target.value;
+        renderTabela();
+      });
+
+      document.getElementById("lanc-cancelar-edicao").addEventListener("click", function () {
+        limparEdicao();
+        ui.limparAlerta("lancamentos-alert");
+      });
+
+      document.getElementById("lanc-form").addEventListener("submit", function (ev) {
+        ev.preventDefault();
+        ui.limparAlerta("lancamentos-alert");
+
+        var descricao = document.getElementById("lanc-descricao").value.trim();
+        var valor = parseFloat(document.getElementById("lanc-valor").value);
+        var categoria = document.getElementById("lanc-categoria").value;
+        var data = document.getElementById("lanc-data").value || hojeISO();
+
+        if (!descricao) { ui.alerta("lancamentos-alert", "Informe a descrição do lançamento.", "error"); return; }
+        if (!valor || valor <= 0) { ui.alerta("lancamentos-alert", "Informe um valor maior que zero.", "error"); return; }
+
+        var dados = { data: data, descricao: descricao, categoria: categoria, tipo: tipoAtual, valor: valor };
+        if (editandoId) {
+          store.updateLancamento(editandoId, dados);
+          destacarId = editandoId;
+          ui.toast("Lançamento atualizado.", "info");
+        } else {
+          destacarId = store.addLancamento(dados).id;
+          ui.toast("Lançamento registrado: " + fmt.currency(valor) + ".");
+        }
+        limparEdicao();
+        layout.refresh(router.current);
+      });
+    }
+
+    function render(params) {
+      init();
+      document.getElementById("lanc-historico-titulo").textContent = "Histórico — " + fmt.mesAno(hojeDate());
+      if (params && params.filtro) setFiltro(params.filtro);
+      if (params && params.editar) editar(params.editar); else renderTabela();
+    }
+
+    return { render: render };
+  })();
+
+  /* =========================================================================
+     View: Contas Fixas
+     ========================================================================= */
+  var viewContas = (function () {
+    var iniciado = false;
+    var filtro = "todas";
+
+    function renderCabecalho() {
+      document.getElementById("contas-subtitulo").textContent = "Despesas recorrentes · " + fmt.mesAno(hojeDate());
+      document.getElementById("contas-lista-titulo").textContent = "Contas de " + fmt.mesAno(hojeDate());
+    }
+
+    function renderStats() {
+      var t = store.totaisContasFixas();
+      motion.tween(document.getElementById("stat-total"), t.total, fmt.currency);
+      motion.tween(document.getElementById("stat-pendente"), t.pendente, fmt.currency);
+      motion.tween(document.getElementById("stat-pago"), t.pago, fmt.currency);
+    }
+
+    function renderLista() {
+      var box = document.getElementById("contas-lista");
+      var lista = store.getContasFixas().filter(function (c) {
+        return filtro === "todas" || c.status === filtro;
+      });
+
+      if (!lista.length) { box.innerHTML = '<div class="mz-empty">Nenhuma conta neste filtro.</div>'; return; }
+
+      box.innerHTML = lista.map(function (c) {
+        var pendente = c.status === "pendente";
+        var dias = diasRestantes(c.vencimento);
+        var urgente = pendente && dias <= 3;
+        var venc = "Vencimento: " + fmt.dateShort(fromISO(c.vencimento));
+        if (pendente) {
+          if (dias < 0) venc += " · vencida há " + Math.abs(dias) + (Math.abs(dias) === 1 ? " dia" : " dias");
+          else if (dias === 0) venc += " · vence hoje";
+          else venc += " · " + dias + (dias === 1 ? " dia restante" : " dias restantes");
+        }
+        var tag = pendente
+          ? (dias < 0 ? '<span class="mz-tag mz-tag--danger">Vencida</span>' : '<span class="mz-tag mz-tag--warning">Pendente</span>')
+          : '<span class="mz-tag mz-tag--success">Paga</span>';
+        var acoes = pendente
+          ? '<button class="mz-btn mz-btn--primary mz-btn--sm" type="button" data-pagar="' + c.id + '">✓ Marcar paga</button>'
+          : '<button class="mz-btn mz-btn--secondary mz-btn--sm" type="button" data-desfazer="' + c.id + '">Desfazer</button>';
+
+        return '<div class="mz-conta-row' + (urgente ? " is-urgent" : "") + '">' +
+          '<span class="mz-conta-row__warn">' + (urgente ? ICONS.warn : "") + "</span>" +
+          '<div class="mz-conta-row__info"><div class="mz-conta-row__nome">' + fmt.escapeHtml(c.nome) + "</div>" +
+            '<div class="mz-conta-row__venc">' + fmt.escapeHtml(venc) + "</div></div>" +
+          '<div class="mz-conta-row__valor">' + fmt.currency(c.valor) + "</div>" +
+          '<div class="mz-conta-row__actions">' + tag + acoes +
+            '<button class="mz-icon-btn mz-icon-btn--danger" type="button" title="Excluir conta" data-excluir="' + c.id + '">' + ICONS.trash + "</button>" +
+          "</div></div>";
+      }).join("");
+
+      box.querySelectorAll("[data-pagar]").forEach(function (btn) {
+        btn.addEventListener("click", function () {
+          var c = store.marcarContaPaga(Number(btn.getAttribute("data-pagar")));
+          if (!c) return;
+          atualizar();
+          layout.refresh(router.current);
+          ui.toast("“" + c.nome + "” paga. Saída de " + fmt.currency(c.valor) + " lançada no caixa.");
+        });
+      });
+      box.querySelectorAll("[data-desfazer]").forEach(function (btn) {
+        btn.addEventListener("click", function () {
+          var c = store.desfazerPagamento(Number(btn.getAttribute("data-desfazer")));
+          if (!c) return;
+          atualizar();
+          layout.refresh(router.current);
+          ui.toast("Pagamento desfeito. O lançamento no caixa foi removido.", "info");
+        });
+      });
+      box.querySelectorAll("[data-excluir]").forEach(function (btn) {
+        btn.addEventListener("click", function () {
+          var id = Number(btn.getAttribute("data-excluir"));
+          var c = store.getContaFixa(id);
+          ui.confirmar("Excluir conta", "Excluir a conta “" + (c ? c.nome : "") + "”?", function () {
+            store.deleteContaFixa(id);
+            atualizar();
+            layout.refresh(router.current);
+            ui.toast("Conta excluída.", "info");
+          }, "Excluir");
+        });
+      });
+    }
+
+    function atualizar() { renderStats(); renderLista(); }
+
+    function init() {
+      if (iniciado) return;
+      iniciado = true;
+
+      var form = document.getElementById("conta-form");
+
+      document.getElementById("btn-nova-conta").addEventListener("click", function () {
+        form.reset();
+        ui.limparAlerta("conta-modal-alert");
+        document.getElementById("conta-vencimento").value = hojeISO();
+        ui.abrirModal("conta-modal-backdrop");
+        document.getElementById("conta-nome").focus();
+      });
+      document.getElementById("conta-modal-cancelar").addEventListener("click", function () { ui.fecharModal("conta-modal-backdrop"); });
+
+      document.getElementById("contas-tabs").addEventListener("click", function (ev) {
+        var btn = ev.target.closest(".mz-tabs__btn");
+        if (!btn) return;
+        filtro = btn.getAttribute("data-filtro");
+        document.querySelectorAll("#contas-tabs .mz-tabs__btn").forEach(function (b) { b.classList.toggle("active", b === btn); });
+        renderLista();
+      });
+
+      form.addEventListener("submit", function (ev) {
+        ev.preventDefault();
+        var nome = document.getElementById("conta-nome").value.trim();
+        var valor = parseFloat(document.getElementById("conta-valor").value);
+        var vencimento = document.getElementById("conta-vencimento").value;
+        if (!nome || !valor || valor <= 0 || !vencimento) {
+          ui.alerta("conta-modal-alert", "Preencha nome, valor maior que zero e data de vencimento.", "error");
+          return;
+        }
+        store.addContaFixa({ nome: nome, valor: valor, vencimento: vencimento });
+        ui.fecharModal("conta-modal-backdrop");
+        atualizar();
+        layout.refresh(router.current);
+        ui.toast("Conta “" + nome + "” cadastrada.");
+      });
+    }
+
+    function render() { init(); renderCabecalho(); atualizar(); }
+    return { render: render };
+  })();
+
+  /* =========================================================================
+     View: Orçamentos
+     Fórmula: valor sugerido = custo dos materiais ÷ (1 − margem/100)
+     ========================================================================= */
+  var viewOrcamentos = (function () {
+    var materiais = [];
+    var iniciado = false;
+    var abaAtual = "calculadora";
+
+    function materialPorId(id) { return materiais.find(function (m) { return Number(m.id) === Number(id); }); }
+
+    function popularSelect(select, idSelecionado) {
+      var anterior = idSelecionado !== undefined ? idSelecionado : select.value;
+      select.innerHTML = materiais.map(function (m) {
+        return '<option value="' + m.id + '">' + fmt.escapeHtml(m.nome) + " — " + fmt.currency(m.preco_unitario) + "/" + fmt.escapeHtml(m.unidade) + "</option>";
+      }).join("");
+      if (anterior && materialPorId(anterior)) select.value = String(anterior);
+    }
+
+    function adicionarLinha(materialId, quantidade) {
+      var tbody = document.getElementById("orc-tbody");
+      var frag = document.getElementById("orc-row-template").content.cloneNode(true);
+      var tr = frag.querySelector("tr");
+      var select = tr.querySelector(".orc-material-select");
+      var qtd = tr.querySelector(".orc-qtd-input");
+      var unidade = tr.querySelector(".orc-unidade-label");
+      var remover = tr.querySelector(".orc-remover");
+
+      popularSelect(select, materialId);
+      if (quantidade) qtd.value = quantidade;
+
+      function atualizar() {
+        var m = materialPorId(select.value);
+        unidade.textContent = m ? " " + m.unidade : "";
+        var q = parseFloat(qtd.value) || 0;
+        tr.querySelector(".orc-custo-label").textContent = fmt.currency(m ? Number(m.preco_unitario) * q : 0);
+        recalcular(true);
+      }
+
+      select.addEventListener("change", atualizar);
+      qtd.addEventListener("input", atualizar);
+      remover.addEventListener("click", function () {
+        if (tbody.children.length <= 1) {
+          qtd.value = 1;
+          select.selectedIndex = 0;
+          atualizar();
+          ui.toast("O orçamento precisa de pelo menos um material.", "info");
+          return;
+        }
+        if (!motion.reduzida) tr.classList.add("is-saindo");
+        window.setTimeout(function () { tr.remove(); recalcular(); }, motion.reduzida ? 0 : 190);
+      });
+
+      tbody.appendChild(tr);
+      if (!motion.reduzida) tr.classList.add("is-nova");
+      atualizar();
+    }
+
+    function linhas() {
+      return Array.prototype.slice.call(document.querySelectorAll("#orc-tbody .mz-orc-row")).map(function (tr) {
+        return {
+          materialId: Number(tr.querySelector(".orc-material-select").value),
+          quantidade: parseFloat(tr.querySelector(".orc-qtd-input").value) || 0
+        };
+      });
+    }
+
+    function recalcular(instantaneo) {
+      var custo = linhas().reduce(function (soma, item) {
+        var m = materialPorId(item.materialId);
+        return m ? soma + Number(m.preco_unitario) * item.quantidade : soma;
+      }, 0);
+      var margem = parseFloat(document.getElementById("orc-margem").value);
+      var valor = margem >= 100 ? custo : custo / (1 - margem / 100);
+
+      document.getElementById("resumo-margem-valor").textContent = margem + "%";
+      var aplicar = instantaneo ? motion.definir : motion.tween;
+      aplicar(document.getElementById("resumo-custo"), custo, fmt.currency);
+      aplicar(document.getElementById("resumo-lucro"), valor - custo, fmt.currency);
+      aplicar(document.getElementById("resumo-valor-sugerido"), valor, fmt.currency);
+      return { custo: custo, valor: valor, margem: margem };
+    }
+
+    function limparCalculadora() {
+      document.getElementById("orc-nome").value = "";
+      document.getElementById("orc-cliente").value = "";
+      document.getElementById("orc-margem").value = 40;
+      document.getElementById("orc-tbody").innerHTML = "";
+      adicionarLinha();
+      recalcular();
+      ui.limparAlerta("orcamento-alert");
+    }
+
+    function carregar(orc) {
+      document.getElementById("orc-nome").value = orc.nomeServico;
+      document.getElementById("orc-cliente").value = orc.cliente;
+      document.getElementById("orc-margem").value = orc.margem;
+      document.getElementById("orc-tbody").innerHTML = "";
+      orc.itens.forEach(function (item) { adicionarLinha(item.materialId, item.quantidade); });
+      if (!document.getElementById("orc-tbody").children.length) adicionarLinha();
+      recalcular();
+      mostrarAba("calculadora");
+      ui.toast("Orçamento “" + orc.nomeServico + "” carregado na calculadora.", "info");
+    }
+
+    function salvar() {
+      ui.limparAlerta("orcamento-alert");
+      var nome = document.getElementById("orc-nome").value.trim();
+      var cliente = document.getElementById("orc-cliente").value.trim();
+      var itens = linhas().filter(function (i) { return i.materialId && i.quantidade > 0; });
+
+      if (!nome) { ui.alerta("orcamento-alert", "Informe o serviço que está sendo orçado.", "error"); return; }
+      if (!cliente) { ui.alerta("orcamento-alert", "Informe o cliente do orçamento.", "error"); return; }
+      if (!itens.length) { ui.alerta("orcamento-alert", "Inclua ao menos um material com quantidade maior que zero.", "error"); return; }
+
+      var r = recalcular();
+      var orc = store.saveOrcamento({
+        nomeServico: nome, cliente: cliente, margem: r.margem, itens: itens,
+        custoMateriais: r.custo, valorSugerido: r.valor
+      });
+      ui.toast("Orçamento salvo — valor sugerido " + fmt.currency(orc.valorSugerido) + ".");
+      limparCalculadora();
+      renderSalvos();
+      mostrarAba("salvos");
+    }
+
+    function folhaImpressao(orc) {
+      var itensHtml = orc.itens.map(function (item) {
+        var m = store.getMaterial(item.materialId);
+        var nome = m ? m.nome : "Material removido";
+        var unidade = m ? m.unidade : "";
+        var custo = m ? Number(m.preco_unitario) * Number(item.quantidade) : 0;
+        return '<div class="mz-print-sheet__linha"><span>' + fmt.escapeHtml(nome) + " · " + item.quantidade + " " + fmt.escapeHtml(unidade) +
+          "</span><span>" + fmt.currency(custo) + "</span></div>";
+      }).join("");
+
+      return '<div class="mz-print-sheet__head"><div>' +
+          '<div class="mz-print-sheet__empresa">' + fmt.escapeHtml(EMPRESA) + "</div>" +
+          "<div>Orçamento nº " + fmt.pad(orc.id) + " · " + fmt.dateShort(fromISO(orc.data)) + "</div></div>" +
+          "<div><strong>Cliente</strong><br />" + fmt.escapeHtml(orc.cliente) + "</div></div>" +
+        "<h2 style=\"margin:0 0 12px;font-size:17px;\">" + fmt.escapeHtml(orc.nomeServico) + "</h2>" +
+        '<p class="mz-eyebrow">Materiais aplicados</p>' + itensHtml +
+        '<div class="mz-print-sheet__linha" style="border-bottom:none;"><span>Custo dos materiais</span><span>' + fmt.currency(orc.custoMateriais) + "</span></div>" +
+        '<div class="mz-print-sheet__linha" style="border-bottom:none;"><span>Margem aplicada</span><span>' + orc.margem + "%</span></div>" +
+        '<div class="mz-print-sheet__total"><span>Valor ao cliente</span><span>' + fmt.currency(orc.valorSugerido) + "</span></div>" +
+        '<p class="mz-print-sheet__rodape">Orçamento válido por 15 dias. Prazo de produção combinado na aprovação.<br />' +
+        fmt.escapeHtml(EMPRESA) + " · documento gerado pelo MazFlow em " + fmt.dateShort(hojeDate()) + ".</p>";
+    }
+
+    function abrirImpressao(orc) {
+      document.getElementById("print-sheet").innerHTML = folhaImpressao(orc);
+      ui.abrirModal("print-modal-backdrop");
+    }
+
+    function renderSalvos() {
+      var box = document.getElementById("orc-salvos-lista");
+      var lista = store.getOrcamentos();
+      document.getElementById("orc-tab-salvos").textContent = "Salvos (" + lista.length + ")";
+
+      if (!lista.length) {
+        box.innerHTML = '<div class="mz-empty">Nenhum orçamento salvo ainda. Monte um na calculadora e clique em Salvar.</div>';
+        return;
+      }
+
+      box.innerHTML = lista.map(function (o) {
+        return '<div class="mz-orc-item">' +
+          '<div><div class="mz-orc-item__nome">' + fmt.escapeHtml(o.nomeServico) + "</div>" +
+          '<div class="mz-orc-item__meta">' + fmt.escapeHtml(o.cliente) + " · " + fmt.dateShort(fromISO(o.data)) + " · margem " + o.margem + "%</div></div>" +
+          '<div class="mz-orc-item__nums"><span>Custo<b>' + fmt.currency(o.custoMateriais) + "</b></span>" +
+          '<span style="text-align:right;">Ao cliente<b class="mz-value--positive">' + fmt.currency(o.valorSugerido) + "</b></span></div>" +
+          '<div class="mz-orc-item__actions">' +
+            '<button class="mz-btn mz-btn--ghost mz-btn--sm" type="button" data-abrir="' + o.id + '">Abrir</button>' +
+            '<button class="mz-btn mz-btn--secondary mz-btn--sm" type="button" data-imprimir="' + o.id + '">PDF</button>' +
+            '<button class="mz-btn mz-btn--secondary mz-btn--sm" type="button" data-remover="' + o.id + '">Excluir</button>' +
+          "</div></div>";
+      }).join("");
+
+      box.querySelectorAll("[data-abrir]").forEach(function (btn) {
+        btn.addEventListener("click", function () {
+          var o = store.getOrcamento(Number(btn.getAttribute("data-abrir")));
+          if (o) carregar(o);
+        });
+      });
+      box.querySelectorAll("[data-imprimir]").forEach(function (btn) {
+        btn.addEventListener("click", function () {
+          var o = store.getOrcamento(Number(btn.getAttribute("data-imprimir")));
+          if (o) abrirImpressao(o);
+        });
+      });
+      box.querySelectorAll("[data-remover]").forEach(function (btn) {
+        btn.addEventListener("click", function () {
+          var id = Number(btn.getAttribute("data-remover"));
+          var o = store.getOrcamento(id);
+          ui.confirmar("Excluir orçamento", "Excluir o orçamento “" + (o ? o.nomeServico : "") + "”?", function () {
+            store.deleteOrcamento(id);
+            renderSalvos();
+            ui.toast("Orçamento excluído.", "info");
+          }, "Excluir");
+        });
+      });
+    }
+
+    function mostrarAba(aba) {
+      abaAtual = aba === "salvos" ? "salvos" : "calculadora";
+      document.getElementById("orc-aba-calculadora").hidden = abaAtual !== "calculadora";
+      document.getElementById("orc-aba-salvos").hidden = abaAtual !== "salvos";
+      document.querySelectorAll("#orc-tabs .mz-tabs__btn").forEach(function (b) {
+        b.classList.toggle("active", b.getAttribute("data-aba") === abaAtual);
+      });
+    }
+
+    function sincronizarMateriais() {
+      materiais = store.getMateriais();
+      document.querySelectorAll("#orc-tbody .orc-material-select").forEach(function (select) {
+        popularSelect(select);
+      });
+      document.querySelectorAll("#orc-tbody .mz-orc-row").forEach(function (tr) {
+        var m = materialPorId(tr.querySelector(".orc-material-select").value);
+        tr.querySelector(".orc-unidade-label").textContent = m ? " " + m.unidade : "";
+        var q = parseFloat(tr.querySelector(".orc-qtd-input").value) || 0;
+        tr.querySelector(".orc-custo-label").textContent = fmt.currency(m ? Number(m.preco_unitario) * q : 0);
+      });
+    }
+
+    function init() {
+      if (iniciado) return;
+      iniciado = true;
+      materiais = store.getMateriais();
+
+      document.getElementById("orc-margem").addEventListener("input", function () { recalcular(true); });
+      document.getElementById("orc-adicionar").addEventListener("click", function () { adicionarLinha(); });
+      document.getElementById("orc-salvar").addEventListener("click", salvar);
+      document.getElementById("orc-novo").addEventListener("click", function () {
+        limparCalculadora();
+        ui.toast("Calculadora limpa.", "info");
+      });
+      document.getElementById("orc-ir-calculadora").addEventListener("click", function () {
+        limparCalculadora();
+        mostrarAba("calculadora");
+      });
+      document.getElementById("orc-tabs").addEventListener("click", function (ev) {
+        var btn = ev.target.closest(".mz-tabs__btn");
+        if (btn) mostrarAba(btn.getAttribute("data-aba"));
+      });
+      document.getElementById("orc-exportar").addEventListener("click", function () {
+        var nome = document.getElementById("orc-nome").value.trim();
+        var cliente = document.getElementById("orc-cliente").value.trim();
+        var itens = linhas().filter(function (i) { return i.materialId && i.quantidade > 0; });
+        if (!itens.length) { ui.alerta("orcamento-alert", "Inclua ao menos um material antes de gerar o PDF.", "error"); return; }
+        var r = recalcular();
+        abrirImpressao({
+          id: 0, nomeServico: nome || "Orçamento sem título", cliente: cliente || "Cliente não informado",
+          data: hojeISO(), margem: r.margem, itens: itens, custoMateriais: r.custo, valorSugerido: r.valor
+        });
+      });
+      document.getElementById("print-fechar").addEventListener("click", function () { ui.fecharModal("print-modal-backdrop"); });
+      document.getElementById("print-imprimir").addEventListener("click", function () {
+        document.body.classList.add("is-printing");
+        try {
+          window.print();
+        } catch (e) {
+          ui.toast("A impressão foi bloqueada aqui. Use a folha na tela ou o print do navegador.", "error");
+        }
+        window.setTimeout(function () { document.body.classList.remove("is-printing"); }, 800);
+      });
+
+      document.getElementById("orc-data").textContent = fmt.dateShort(hojeDate());
+
+      var exemplo = store.getOrcamentos()[0];
+      if (exemplo) {
+        document.getElementById("orc-nome").value = exemplo.nomeServico;
+        document.getElementById("orc-cliente").value = exemplo.cliente;
+        document.getElementById("orc-margem").value = exemplo.margem;
+        exemplo.itens.forEach(function (item) { adicionarLinha(item.materialId, item.quantidade); });
+      }
+      if (!document.getElementById("orc-tbody").children.length) adicionarLinha();
+    }
+
+    function render(params) {
+      init();
+      sincronizarMateriais();
+      recalcular();
+      renderSalvos();
+      if (params && params.aba) mostrarAba(params.aba); else mostrarAba(abaAtual);
+    }
+
+    return { render: render };
+  })();
+
+  /* =========================================================================
+     View: Materiais — criar/editar/excluir apenas para Administrador
+     ========================================================================= */
+  var viewMateriais = (function () {
+    var iniciado = false;
+    var editandoId = null;
+    var busca = "";
+
+    function admin() { return store.isAdmin(); }
+
+    function renderTabela() {
+      var tbody = document.getElementById("materiais-tbody");
+      var termo = busca.trim().toLowerCase();
+      var lista = store.getMateriais().filter(function (m) {
+        return !termo || m.nome.toLowerCase().indexOf(termo) !== -1 || m.unidade.toLowerCase().indexOf(termo) !== -1;
+      });
+      var colunas = admin() ? 6 : 5;
+
+      document.getElementById("col-acoes").hidden = !admin();
+      document.getElementById("foot-acoes").hidden = !admin();
+
+      if (!lista.length) {
+        tbody.innerHTML = '<tr><td colspan="' + colunas + '"><div class="mz-empty">' +
+          (termo ? "Nenhum material encontrado para essa busca." : "Nenhum material cadastrado ainda.") + "</div></td></tr>";
+      } else {
+        tbody.innerHTML = lista.map(function (m) {
+          var baixo = store.isEstoqueBaixo(m);
+          var estoque = baixo
+            ? '<span class="mz-value--danger">' + m.quantidade_estoque + '</span><span class="mz-tag mz-tag--danger">Baixo</span>'
+            : String(m.quantidade_estoque);
+          var acoes = admin()
+            ? '<td class="num" data-label="Ações"><span class="mz-row-actions">' +
+                '<button class="mz-icon-btn" type="button" title="Editar" data-editar="' + m.id + '">' + ICONS.editSm + "</button>" +
+                '<button class="mz-icon-btn mz-icon-btn--danger" type="button" title="Excluir" data-excluir="' + m.id + '">' + ICONS.trash + "</button>" +
+              "</span></td>"
+            : "";
+          return "<tr>" +
+            '<td data-label="Material">' + fmt.escapeHtml(m.nome) + "</td>" +
+            '<td data-label="Unidade"><span class="mz-unit">' + fmt.escapeHtml(m.unidade) + "</span></td>" +
+            '<td class="num" data-label="Preço Unit.">' + fmt.currency(m.preco_unitario) + "</td>" +
+            '<td class="num" data-label="Estoque">' + estoque + "</td>" +
+            '<td class="num" data-label="Valor em Estoque">' + fmt.currency(store.valorEmEstoque(m)) + "</td>" +
+            acoes + "</tr>";
+        }).join("");
+      }
+
+      motion.tween(document.getElementById("materiais-total"), store.totalEmEstoque(), fmt.currency);
+
+      tbody.querySelectorAll("[data-editar]").forEach(function (btn) {
+        btn.addEventListener("click", function () { abrirEdicao(Number(btn.getAttribute("data-editar"))); });
+      });
+      tbody.querySelectorAll("[data-excluir]").forEach(function (btn) {
+        btn.addEventListener("click", function () {
+          var id = Number(btn.getAttribute("data-excluir"));
+          var m = store.getMaterial(id);
+          ui.confirmar("Excluir material", "Excluir “" + (m ? m.nome : "") + "”? Orçamentos já salvos mantêm o valor calculado.", function () {
+            store.deleteMaterial(id);
+            renderTabela();
+            layout.refresh(router.current);
+            ui.toast("Material excluído.", "info");
+          }, "Excluir");
+        });
+      });
+    }
+
+    function abrirNovo() {
+      editandoId = null;
+      document.getElementById("material-modal-title").textContent = "Novo Material";
+      ui.limparAlerta("material-modal-alert");
+      document.getElementById("material-form").reset();
+      document.getElementById("material-id").value = "";
+      ui.abrirModal("material-modal-backdrop");
+      document.getElementById("material-nome").focus();
+    }
+
+    function abrirEdicao(id) {
+      var m = store.getMaterial(id);
+      if (!m) return;
+      editandoId = id;
+      document.getElementById("material-modal-title").textContent = "Editar Material";
+      ui.limparAlerta("material-modal-alert");
+      document.getElementById("material-id").value = m.id;
+      document.getElementById("material-nome").value = m.nome;
+      document.getElementById("material-unidade").value = m.unidade;
+      document.getElementById("material-preco").value = m.preco_unitario;
+      document.getElementById("material-estoque").value = m.quantidade_estoque;
+      document.getElementById("material-minimo").value = m.estoque_minimo;
+      ui.abrirModal("material-modal-backdrop");
+      document.getElementById("material-nome").focus();
+    }
+
+    function init() {
+      if (iniciado) return;
+      iniciado = true;
+
+      document.getElementById("btn-novo-material").addEventListener("click", abrirNovo);
+      document.getElementById("material-modal-cancelar").addEventListener("click", function () {
+        ui.fecharModal("material-modal-backdrop");
+        editandoId = null;
+      });
+      document.getElementById("materiais-busca").addEventListener("input", function (ev) {
+        busca = ev.target.value;
+        renderTabela();
+      });
+
+      document.getElementById("material-form").addEventListener("submit", function (ev) {
+        ev.preventDefault();
+        ui.limparAlerta("material-modal-alert");
+        var dados = {
+          id: editandoId,
+          nome: document.getElementById("material-nome").value.trim(),
+          unidade: document.getElementById("material-unidade").value.trim(),
+          preco_unitario: parseFloat(document.getElementById("material-preco").value),
+          quantidade_estoque: parseInt(document.getElementById("material-estoque").value, 10),
+          estoque_minimo: parseInt(document.getElementById("material-minimo").value, 10)
+        };
+        if (!dados.nome || !dados.unidade || isNaN(dados.preco_unitario) || isNaN(dados.quantidade_estoque) || isNaN(dados.estoque_minimo)) {
+          ui.alerta("material-modal-alert", "Preencha nome, unidade, preço e as quantidades de estoque.", "error");
+          return;
+        }
+        if (dados.preco_unitario < 0 || dados.quantidade_estoque < 0 || dados.estoque_minimo < 0) {
+          ui.alerta("material-modal-alert", "Preço e quantidades não podem ser negativos.", "error");
+          return;
+        }
+        var salvo = store.saveMaterial(dados);
+        ui.fecharModal("material-modal-backdrop");
+        ui.toast(editandoId ? "Material “" + salvo.nome + "” atualizado." : "Material “" + salvo.nome + "” cadastrado.");
+        editandoId = null;
+        renderTabela();
+        layout.refresh(router.current);
+      });
+    }
+
+    function render() {
+      init();
+      document.getElementById("btn-novo-material").classList.toggle("mz-hidden", !admin());
+      renderTabela();
+    }
+
+    return { render: render };
+  })();
+
+  /* =========================================================================
+     Bootstrap
+     ========================================================================= */
+  function iniciar() {
+    if (window.__mazflowIniciado) return;
+    window.__mazflowIniciado = true;
+    ui.init();
+    router.init();
+    auth.init();
+  }
+
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", iniciar);
+  else iniciar();
+})();
+</script>

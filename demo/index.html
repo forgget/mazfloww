@@ -1,3 +1,9 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0033ff">
 <title>MazFlow</title>
 <style>
 :root {
@@ -285,8 +291,8 @@ img { max-width: 100%; }
 .mz-conta-mini { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 12px 8px; border-bottom: 1px solid var(--color-border); width: 100%; background: transparent; border-left: none; border-right: none; border-top: none; text-align: left; cursor: pointer; font: inherit; color: inherit; border-radius: 6px; }
 .mz-conta-mini:last-child { border-bottom: none; }
 .mz-conta-mini:hover { background: #f5f6fa; }
-.mz-conta-mini__nome { font-size: 14px; font-weight: 600; }
-.mz-conta-mini__venc { font-size: 12px; color: var(--color-gray); }
+.mz-conta-mini__nome { display: block; font-size: 14px; font-weight: 600; }
+.mz-conta-mini__venc { display: block; margin-top: 2px; font-size: 12px; color: var(--color-gray); }
 .mz-conta-mini__right { text-align: right; flex: none; }
 .mz-conta-mini__valor { font-size: 14px; font-weight: 600; margin-bottom: 4px; font-variant-numeric: tabular-nums; }
 .mz-lanc-item { display: flex; align-items: center; gap: 12px; padding: 14px 8px; border-bottom: 1px solid var(--color-border); width: 100%; background: transparent; border-left: none; border-right: none; border-top: none; text-align: left; cursor: pointer; font: inherit; color: inherit; border-radius: 6px; }
@@ -493,6 +499,209 @@ img { max-width: 100%; }
   }
   .mz-kpi-card:hover, .mz-conta-mini:hover, .mz-lanc-item:hover, .mz-orc-item:hover { transform: none; }
 }
+
+/* =========================================================================
+   Celular — fica no fim para vencer as regras de animação acima
+   ========================================================================= */
+.mz-bottomnav { display: none; }
+body.is-locked { overflow: hidden; }
+
+/* toque: alvos de 44px e sem hover "grudado" */
+@media (pointer: coarse) {
+  .mz-icon-btn, .mz-bell, .mz-hamburger { min-width: 44px; min-height: 44px; justify-content: center; }
+  .mz-kpi-card:hover, .mz-conta-mini:hover, .mz-lanc-item:hover, .mz-orc-item:hover, .mz-bell:hover { transform: none; }
+  .mz-orc-item:hover { box-shadow: none; border-color: var(--color-border); }
+}
+
+@media (max-width: 900px) {
+  /* iOS amplia a tela ao focar campos com fonte < 16px */
+  .mz-input, .mz-select { font-size: 16px; }
+  .mz-login, .mz-shell { min-height: 100dvh; }
+  .mz-sidebar { overflow-y: auto; overscroll-behavior: contain; visibility: hidden; transition: transform .2s ease, visibility 0s .2s; }
+  .mz-sidebar.open { visibility: visible; transition: transform .2s ease; }
+}
+
+@media (max-width: 720px) {
+  /* ---------- estrutura ---------- */
+  .mz-topbar { padding: 0 8px 0 4px; gap: 8px; }
+  .mz-topbar__right { gap: 4px; }
+  .mz-hamburger { display: none !important; }
+  .mz-content { padding: 18px 14px calc(92px + env(safe-area-inset-bottom, 0px)); }
+  .mz-card { padding: 16px; }
+  .mz-card + .mz-card { margin-top: 14px; }
+  .mz-card { scroll-margin-top: calc(var(--topbar-height) + 12px); }
+  .mz-page-header { margin-bottom: 16px; gap: 12px; }
+  .mz-page-header h1 { font-size: 22px; }
+  .mz-toast-wrap { bottom: calc(80px + env(safe-area-inset-bottom, 0px)); }
+
+  /* ---------- barra de navegação inferior ---------- */
+  .mz-bottomnav {
+    display: flex; position: fixed; left: 0; right: 0; bottom: 0; z-index: 44;
+    background: var(--color-white); border-top: 1px solid var(--color-border);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+    box-shadow: 0 -6px 20px rgba(16,17,44,.06);
+  }
+  .mz-bottomnav__item {
+    flex: 1; min-width: 0; min-height: 60px; position: relative;
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px;
+    font-size: 11px; font-weight: 600; color: var(--color-gray); text-decoration: none;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .mz-bottomnav__item.active { color: var(--color-primary); }
+  .mz-bottomnav__item.active::before { content: ""; position: absolute; top: 0; left: 28%; right: 28%; height: 3px; border-radius: 0 0 3px 3px; background: var(--color-primary); }
+  .mz-bottomnav__icon { display: flex; }
+  .mz-bottomnav__label { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .mz-bottomnav .mz-nav__badge { position: absolute; top: 6px; left: calc(50% + 6px); min-width: 16px; height: 16px; font-size: 10px; padding: 0 4px; }
+
+  /* ---------- notificações e menu do usuário ---------- */
+  .mz-notif__panel, .mz-user__dropdown {
+    position: fixed; left: 12px; right: 12px; width: auto; max-width: none;
+    top: calc(var(--topbar-height) + env(safe-area-inset-top, 0px) + 6px);
+    max-height: 70dvh; overflow-y: auto;
+  }
+  .mz-notif__item, .mz-menu-item { min-height: 48px; }
+
+  /* ---------- botões, abas, links ---------- */
+  .mz-btn { min-height: 44px; }
+  .mz-btn--sm { min-height: 40px; font-size: 14px; }
+  .mz-header-actions { width: 100%; }
+  .mz-form-actions .mz-btn { flex: 1; }
+  .mz-header-actions .mz-btn { flex: 1; }
+  .mz-tabs, .mz-toggle { display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; width: 100%; }
+  .mz-tabs__btn { min-height: 40px; font-size: 14px; padding: 8px 6px; }
+  .mz-toggle__btn { min-height: 44px; }
+  .mz-link, .mz-alert__link { padding: 10px 4px; margin: -10px -4px; }
+  .mz-section-header { gap: 10px; }
+  .mz-search { min-width: 0; width: 100%; max-width: none !important; }
+
+  /* ---------- Início ---------- */
+  #view-inicio:not([hidden]) { display: flex; flex-direction: column; gap: 14px; }
+  #view-inicio > *, #view-inicio .mz-home-grid > * { margin: 0 !important; }
+  #view-inicio .mz-home-grid { display: contents; }
+  #view-inicio .mz-chart-card { order: 9; }
+  #inicio-banner:empty { display: none; }
+  #inicio-banner .mz-alert { margin: 0; }
+  .mz-kpi-grid { grid-template-columns: 1fr 1fr; gap: 10px; }
+  #kpi-card-saldo { grid-column: 1 / -1; order: -1; }
+  .mz-kpi-card { padding: 14px; }
+  .mz-kpi-card:not(#kpi-card-saldo) .mz-kpi-icon,
+  .mz-kpi-card:not(#kpi-card-saldo) .mz-kpi-hint { display: none; }
+  .mz-kpi-card:not(#kpi-card-saldo) .mz-kpi-value { font-size: 18px; }
+  .mz-kpi-card .mz-eyebrow { margin-bottom: 6px; }
+  .mz-chart { gap: 6px; }
+  .mz-chart__axis, .mz-chart__plot { height: 190px; }
+  .mz-chart__plot { background-size: 100% 170px; padding: 0 2px; }
+  .mz-chart__month { min-width: 0; }
+  .mz-chart__bars { gap: 3px; }
+  .mz-chart__bar { width: clamp(6px, 2.6vw, 16px); }
+  .mz-chart-detail { gap: 6px 14px; }
+
+  /* ---------- tabelas viram cartões ---------- */
+  .mz-table-wrap { padding: 0 12px; }
+  .mz-table tbody td::before { flex: none; }
+  .mz-table td[colspan] { display: block; text-align: center; }
+  .mz-table td[colspan]::before { display: none; }
+  .mz-table tfoot tr { display: flex; justify-content: space-between; align-items: center; background: var(--color-table-head-bg); border-radius: 10px; margin-bottom: 12px; }
+  .mz-table tfoot td { display: block; width: auto; background: none; }
+  .mz-table tfoot td:empty, .mz-table tfoot td[hidden] { display: none; }
+
+  /* Lançamentos: cartão de 2 linhas — descrição + valor / data · categoria + ações */
+  #lanc-tbody tr.mz-lanc-row {
+    display: grid; grid-template-columns: auto minmax(0,1fr) auto;
+    grid-template-areas: "desc desc valor" "data cat acoes";
+    align-items: center; gap: 0 8px; padding: 10px 6px 4px 14px; margin-bottom: 10px;
+  }
+  #lanc-tbody tr.mz-lanc-row td { display: block; width: auto; padding: 0; border: 0; text-align: left; }
+  #lanc-tbody tr.mz-lanc-row td::before { content: none; }
+  #lanc-tbody tr.mz-lanc-row td:nth-child(1) { grid-area: data; font-size: 13px; color: var(--color-gray); }
+  #lanc-tbody tr.mz-lanc-row td:nth-child(2) { grid-area: desc; font-weight: 600; font-size: 15px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  #lanc-tbody tr.mz-lanc-row td:nth-child(3) { grid-area: cat; font-size: 13px; color: var(--color-gray); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  #lanc-tbody tr.mz-lanc-row td:nth-child(3)::before { content: "· "; }
+  #lanc-tbody tr.mz-lanc-row td:nth-child(4) { grid-area: valor; font-size: 16px; font-weight: 700; text-align: right; padding-right: 8px; }
+  #lanc-tbody tr.mz-lanc-row td:nth-child(5) { grid-area: acoes; }
+  #lanc-tbody tr.mz-lanc-row .mz-row-actions { gap: 0; }
+
+  /* Materiais: nome + estoque / unidade · preço + ações */
+  #materiais-tbody tr.mz-mat-row {
+    display: grid; grid-template-columns: auto minmax(0,1fr) auto;
+    grid-template-areas: "nome nome estoque" "unid preco acoes";
+    align-items: center; gap: 2px 8px; padding: 12px 6px 6px 14px; margin-bottom: 10px;
+  }
+  #materiais-tbody tr.mz-mat-row td { display: block; width: auto; padding: 0; border: 0; text-align: left; }
+  #materiais-tbody tr.mz-mat-row td::before { content: none; }
+  #materiais-tbody tr.mz-mat-row td:nth-child(1) { grid-area: nome; font-weight: 600; font-size: 15px; }
+  #materiais-tbody tr.mz-mat-row td:nth-child(2) { grid-area: unid; font-size: 13px; }
+  #materiais-tbody tr.mz-mat-row td:nth-child(3) { grid-area: preco; font-size: 13px; color: var(--color-gray); }
+  #materiais-tbody tr.mz-mat-row td:nth-child(3)::before { content: "· "; }
+  #materiais-tbody tr.mz-mat-row td:nth-child(3)::after { content: " /un"; }
+  #materiais-tbody tr.mz-mat-row td:nth-child(4) { grid-area: estoque; text-align: right; font-weight: 700; font-size: 15px; padding-right: 8px; }
+  #materiais-tbody tr.mz-mat-row td:nth-child(4)::before { content: "Estoque "; font-size: 11px; font-weight: 600; color: var(--color-gray); text-transform: uppercase; letter-spacing: .04em; }
+  #materiais-tbody tr.mz-mat-row td:nth-child(5) { display: none; }
+  #materiais-tbody tr.mz-mat-row td:nth-child(6) { grid-area: acoes; }
+  #materiais-tbody tr.mz-mat-row .mz-row-actions { gap: 0; }
+  #materiais-tbody tr.mz-mat-row:not(:has(td:nth-child(6))) { padding-bottom: 12px; }
+
+  /* Orçamento: material em cima / quantidade · custo · remover embaixo */
+  #orc-tbody tr.mz-orc-row {
+    display: grid; grid-template-columns: minmax(0,1fr) auto auto;
+    grid-template-areas: "mat mat mat" "qtd custo rem";
+    align-items: center; gap: 8px; padding: 10px; margin-bottom: 10px;
+  }
+  #orc-tbody tr.mz-orc-row td { display: flex; align-items: center; justify-content: flex-start; gap: 8px; width: auto; padding: 0; border: 0; text-align: left; background: transparent; }
+  #orc-tbody tr.mz-orc-row td::before { content: none; }
+  #orc-tbody tr.mz-orc-row td:nth-child(1) { grid-area: mat; }
+  #orc-tbody tr.mz-orc-row td:nth-child(2) { grid-area: qtd; }
+  #orc-tbody tr.mz-orc-row td:nth-child(2) .mz-input { width: 96px; }
+  #orc-tbody tr.mz-orc-row td:nth-child(3) { grid-area: custo; font-weight: 700; }
+  #orc-tbody tr.mz-orc-row td:nth-child(4) { grid-area: rem; }
+  .mz-table-wrap:has(#orc-tbody) { padding: 0; }
+  #orc-novo { order: 2; }
+
+  /* ---------- Contas Fixas ---------- */
+  .mz-stat-grid { grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 14px; }
+  .mz-stat-grid .mz-card { margin: 0; padding: 14px; }
+  .mz-stat-grid .mz-card:first-child { grid-column: 1 / -1; }
+  .mz-stat-grid .mz-stat-value { font-size: 19px; }
+  .mz-stat-grid .mz-eyebrow { margin-bottom: 4px; }
+  #btn-nova-conta { width: 100%; }
+  .mz-conta-row { gap: 4px 10px; padding: 14px 0; }
+  .mz-conta-row.is-urgent { margin: 0 -16px; padding: 14px 16px; border-left: 4px solid var(--color-red); padding-left: 12px; }
+  .mz-conta-row__info { min-width: 0; flex: 1 1 calc(100% - 40px); }
+  .mz-conta-row__valor { min-width: 0; font-size: 16px; }
+  .mz-conta-row__actions { margin-left: auto; }
+
+  /* ---------- Orçamentos salvos ---------- */
+  .mz-orc-list { grid-template-columns: 1fr; gap: 12px; }
+
+  /* ---------- modais viram "bottom sheet" ---------- */
+  .mz-modal-backdrop { align-items: flex-end; padding: 0; }
+  .mz-modal {
+    max-width: none; border-radius: 18px 18px 0 0;
+    max-height: calc(100dvh - env(safe-area-inset-top, 0px) - 24px);
+    padding: 22px 16px calc(18px + env(safe-area-inset-bottom, 0px));
+    overscroll-behavior: contain;
+    transform: translateY(40px);
+  }
+  .mz-modal::before { content: ""; display: block; width: 40px; height: 4px; border-radius: 4px; background: var(--color-border); margin: -8px auto 14px; }
+  .mz-modal--wide { max-width: none; }
+  .mz-modal-actions { flex-direction: column-reverse; }
+  .mz-modal-actions .mz-btn { width: 100%; min-height: 48px; }
+  .mz-modal .mz-field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .mz-modal .mz-field-row .mz-field { min-width: 0; }
+  .mz-field-row .mz-field { min-width: 0; flex-basis: 100%; }
+}
+
+/* telas muito estreitas (≤ 360px) */
+@media (max-width: 360px) {
+  .mz-bottomnav__item { font-size: 10px; }
+  .mz-kpi-card:not(#kpi-card-saldo) .mz-kpi-value { font-size: 16px; }
+}
+
+/* a animação de entrada do menu lateral só faz sentido no desktop;
+   no celular ela anulava o translateX(-100%) e o menu "piscava" aberto */
+@media (max-width: 900px) {
+  #mz-app.is-entrando .mz-sidebar { animation: none; }
+}
 </style>
 
 <!-- ===================== LOGIN ===================== -->
@@ -509,7 +718,7 @@ img { max-width: 100%; }
     <form id="login-form">
       <div class="mz-field">
         <label for="login-usuario">Usuário</label>
-        <input class="mz-input" type="text" id="login-usuario" value="mazart" autocomplete="username" required />
+        <input class="mz-input" type="text" id="login-usuario" value="mazart" autocapitalize="none" autocorrect="off" spellcheck="false" autocomplete="username" required />
       </div>
       <div class="mz-field">
         <label for="login-senha">Senha</label>
@@ -582,7 +791,7 @@ img { max-width: 100%; }
         <div class="mz-home-grid">
           <div class="mz-card mz-chart-card">
             <h2>Fluxo de Caixa — Últimos 6 Meses</h2>
-            <p class="mz-chart-sub">Entradas e saídas em R$ · clique em um mês para ver o detalhe</p>
+            <p class="mz-chart-sub">Entradas e saídas em R$ · toque em um mês para ver o detalhe</p>
             <div class="mz-chart">
               <div class="mz-chart__axis" id="chart-axis"></div>
               <div class="mz-chart__plot" id="chart-plot"></div>
@@ -637,7 +846,7 @@ img { max-width: 100%; }
               </div>
               <div class="mz-field">
                 <label for="lanc-valor">Valor (R$)</label>
-                <input class="mz-input" type="number" id="lanc-valor" min="0.01" step="0.01" placeholder="0,00" required />
+                <input class="mz-input" type="number" id="lanc-valor" inputmode="decimal" enterkeyhint="next" min="0.01" step="0.01" placeholder="0,00" required />
               </div>
               <div class="mz-field">
                 <label for="lanc-categoria">Categoria</label>
@@ -674,7 +883,7 @@ img { max-width: 100%; }
             </div>
             <div class="mz-search" style="margin-bottom:18px;max-width:320px;">
               <span class="mz-search__icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg></span>
-              <input class="mz-input" type="search" id="lanc-busca" placeholder="Buscar por descrição ou categoria" />
+              <input class="mz-input" type="search" id="lanc-busca" enterkeyhint="search" placeholder="Buscar por descrição ou categoria" />
             </div>
           </div>
           <div class="mz-table-wrap">
@@ -748,7 +957,7 @@ img { max-width: 100%; }
                   </div>
                   <div class="mz-field">
                     <label for="orc-cliente">Cliente</label>
-                    <input class="mz-input" type="text" id="orc-cliente" placeholder="Ex: Móveis Aurora" />
+                    <input class="mz-input" type="text" id="orc-cliente" autocapitalize="words" placeholder="Ex: Móveis Aurora" />
                   </div>
                 </div>
               </div>
@@ -804,7 +1013,7 @@ img { max-width: 100%; }
         <template id="orc-row-template">
           <tr class="mz-orc-row">
             <td data-label="Material"><select class="mz-select orc-material-select"></select></td>
-            <td data-label="Qtd"><input class="mz-input orc-qtd-input" type="number" min="0.01" step="0.01" value="1" /><span class="mz-unit orc-unidade-label"></span></td>
+            <td data-label="Qtd"><input class="mz-input orc-qtd-input" type="number" inputmode="decimal" min="0.01" step="0.01" value="1" /><span class="mz-unit orc-unidade-label"></span></td>
             <td class="num" data-label="Custo"><span class="orc-custo-label">R$ 0,00</span></td>
             <td data-label="Remover"><button class="mz-icon-btn mz-icon-btn--danger orc-remover" type="button" title="Remover material">✕</button></td>
           </tr>
@@ -821,7 +1030,7 @@ img { max-width: 100%; }
           <div class="mz-header-actions">
             <div class="mz-search">
               <span class="mz-search__icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg></span>
-              <input class="mz-input" type="search" id="materiais-busca" placeholder="Buscar material" />
+              <input class="mz-input" type="search" id="materiais-busca" enterkeyhint="search" placeholder="Buscar material" />
             </div>
             <button class="mz-btn mz-btn--primary mz-hidden" type="button" id="btn-novo-material">+ Novo Material</button>
           </div>
@@ -858,7 +1067,7 @@ img { max-width: 100%; }
       <div class="mz-field-row">
         <div class="mz-field">
           <label for="conta-valor">Valor (R$)</label>
-          <input class="mz-input" type="number" id="conta-valor" min="0.01" step="0.01" placeholder="0,00" required />
+          <input class="mz-input" type="number" id="conta-valor" inputmode="decimal" min="0.01" step="0.01" placeholder="0,00" required />
         </div>
         <div class="mz-field">
           <label for="conta-vencimento">Vencimento</label>
@@ -886,11 +1095,11 @@ img { max-width: 100%; }
       </div>
       <div class="mz-field-row">
         <div class="mz-field"><label for="material-unidade">Unidade</label><input class="mz-input" type="text" id="material-unidade" placeholder="Ex: resma, folha, m², un" required /></div>
-        <div class="mz-field"><label for="material-preco">Preço Unit. (R$)</label><input class="mz-input" type="number" id="material-preco" min="0" step="0.01" placeholder="0,00" required /></div>
+        <div class="mz-field"><label for="material-preco">Preço Unit. (R$)</label><input class="mz-input" type="number" id="material-preco" inputmode="decimal" min="0" step="0.01" placeholder="0,00" required /></div>
       </div>
       <div class="mz-field-row">
-        <div class="mz-field"><label for="material-estoque">Quantidade em Estoque</label><input class="mz-input" type="number" id="material-estoque" min="0" step="1" placeholder="0" required /></div>
-        <div class="mz-field"><label for="material-minimo">Estoque Mínimo</label><input class="mz-input" type="number" id="material-minimo" min="0" step="1" placeholder="0" required /></div>
+        <div class="mz-field"><label for="material-estoque">Quantidade em Estoque</label><input class="mz-input" type="number" id="material-estoque" inputmode="numeric" min="0" step="1" placeholder="0" required /></div>
+        <div class="mz-field"><label for="material-minimo">Estoque Mínimo</label><input class="mz-input" type="number" id="material-minimo" inputmode="numeric" min="0" step="1" placeholder="0" required /></div>
       </div>
       <div class="mz-modal-actions">
         <button type="button" class="mz-btn mz-btn--secondary" id="material-modal-cancelar">Cancelar</button>
@@ -928,6 +1137,8 @@ img { max-width: 100%; }
   "use strict";
 
   var EMPRESA = "Gráfica Mazart";
+  // celular/tablet: não abrir o teclado sozinho ao abrir formulários
+  var TOQUE = !!(window.matchMedia && window.matchMedia("(pointer: coarse)").matches);
 
   /* =========================================================================
      Formatação
@@ -1397,7 +1608,7 @@ img { max-width: 100%; }
         bd.addEventListener("click", function (ev) { if (ev.target === bd) fecharModal(bd.id); });
       });
       document.addEventListener("keydown", function (ev) {
-        if (ev.key === "Escape") fecharTodosModais();
+        if (ev.key === "Escape") { fecharTodosModais(); if (typeof layout !== "undefined") layout.toggleSidebar(false); }
       });
     }
 
@@ -1424,8 +1635,8 @@ img { max-width: 100%; }
 
   var MENU = [
     { key: "inicio", label: "Início", icon: "grid" },
-    { key: "lancamentos", label: "Lançamentos", icon: "plus" },
-    { key: "contas", label: "Contas Fixas", icon: "list", badge: "contas" },
+    { key: "lancamentos", label: "Lançamentos", short: "Caixa", icon: "plus" },
+    { key: "contas", label: "Contas Fixas", short: "Contas", icon: "list", badge: "contas" },
     { key: "orcamentos", label: "Orçamentos", icon: "edit" },
     { key: "materiais", label: "Materiais", icon: "tag", badge: "estoque" }
   ];
@@ -1485,6 +1696,7 @@ img { max-width: 100%; }
                 '<div class="mz-user__info"><strong>' + fmt.escapeHtml(sessao.usuario) + "</strong>" +
                   "<span>" + (sessao.papel === "administrador" ? "Administrador" : "Funcionário") + " · " + fmt.escapeHtml(EMPRESA) + "</span></div>" +
                 '<button type="button" class="mz-menu-item" id="mz-trocar-papel">Trocar de perfil</button>' +
+                '<button type="button" class="mz-menu-item" id="mz-reset-dropdown">↺ Resetar dados da demonstração</button>' +
                 '<button type="button" class="mz-menu-item mz-menu-item--danger" id="mz-logout-dropdown">Sair do sistema</button>' +
               "</div></div>" +
           "</div></header>";
@@ -1512,6 +1724,10 @@ img { max-width: 100%; }
         ui.toast("Perfil alterado para " + (novo === "administrador" ? "Administrador" : "Funcionário") + ".", "info");
         router.show(router.current);
       });
+      document.getElementById("mz-reset-dropdown").addEventListener("click", function () {
+        document.getElementById("mz-user").classList.remove("open");
+        resetarDemo();
+      });
       document.getElementById("mz-logout-dropdown").addEventListener("click", function () {
         document.getElementById("mz-user").classList.remove("open");
         sair();
@@ -1526,6 +1742,9 @@ img { max-width: 100%; }
       var abrir = force !== undefined ? force : !sidebar.classList.contains("open");
       sidebar.classList.toggle("open", abrir);
       overlay.classList.toggle("open", abrir);
+      document.body.classList.toggle("is-locked", abrir);
+      var hb = document.getElementById("mz-hamburger");
+      if (hb) hb.setAttribute("aria-expanded", String(abrir));
     }
 
     function renderSidebar(ativa) {
@@ -1542,6 +1761,19 @@ img { max-width: 100%; }
           '<span class="mz-nav__icon">' + ICONS[item.icon] + '</span><span class="mz-nav__label">' + item.label + "</span>" + badge + "</a>";
       }).join("");
 
+      // barra inferior do celular (só aparece em telas ≤ 720px, via CSS)
+      var abas = MENU.map(function (item) {
+        var valor = item.badge === "contas" ? pendentes : item.badge === "estoque" ? emFalta : 0;
+        var badge = valor
+          ? '<span class="mz-nav__badge' + (item.badge === "estoque" ? " mz-nav__badge--danger" : "") + '">' + valor + "</span>"
+          : "";
+        var ativo = item.key === ativa;
+        return '<a class="mz-bottomnav__item' + (ativo ? " active" : "") + '" href="#/' + item.key + '" data-route="' + item.key + '"' +
+          (ativo ? ' aria-current="page"' : "") + '>' +
+          '<span class="mz-bottomnav__icon">' + ICONS[item.icon] + "</span>" +
+          '<span class="mz-bottomnav__label">' + (item.short || item.label) + "</span>" + badge + "</a>";
+      }).join("");
+
       root.innerHTML =
         '<div class="mz-overlay" id="mz-overlay"></div>' +
         '<aside class="mz-sidebar" id="mz-sidebar-inner">' +
@@ -1549,26 +1781,26 @@ img { max-width: 100%; }
           "<div>" +
             '<button class="mz-logout-btn" type="button" id="mz-logout-sidebar">' + ICONS.logout + "<span>Sair</span></button>" +
             '<button class="mz-reset-demo" type="button" id="mz-reset-demo">↺ Resetar dados da demonstração</button>' +
-          "</div></aside>";
+          "</div></aside>" +
+        '<nav class="mz-bottomnav" aria-label="Navegação principal">' + abas + "</nav>";
 
-      var reset = document.getElementById("mz-reset-demo");
-
+      document.body.classList.remove("is-locked");
       document.getElementById("mz-logout-sidebar").addEventListener("click", sair);
       document.getElementById("mz-overlay").addEventListener("click", function () { toggleSidebar(false); });
-      if (reset) {
-        reset.addEventListener("click", function () {
-          ui.confirmar(
-            "Resetar demonstração",
-            "Isto apaga os lançamentos, contas e orçamentos criados durante a demonstração e volta aos dados de exemplo. Continuar?",
-            function () {
-              store.resetDemo();
-              ui.toast("Dados de exemplo restaurados.", "info");
-              router.goto("inicio");
-            },
-            "Resetar"
-          );
-        });
-      }
+      document.getElementById("mz-reset-demo").addEventListener("click", resetarDemo);
+    }
+
+    function resetarDemo() {
+      ui.confirmar(
+        "Resetar demonstração",
+        "Isto apaga os lançamentos, contas e orçamentos criados durante a demonstração e volta aos dados de exemplo. Continuar?",
+        function () {
+          store.resetDemo();
+          ui.toast("Dados de exemplo restaurados.", "info");
+          router.goto("inicio");
+        },
+        "Resetar"
+      );
     }
 
     function sair() {
@@ -1877,7 +2109,9 @@ img { max-width: 100%; }
       document.getElementById("lanc-submit").textContent = "Salvar alterações";
       document.getElementById("lanc-cancelar-edicao").classList.remove("mz-hidden");
       renderTabela();
-      document.getElementById("lanc-descricao").focus();
+      var cardForm = document.getElementById("lanc-form").closest(".mz-card");
+      if (TOQUE) cardForm.scrollIntoView({ block: "start", behavior: motion.reduzida ? "auto" : "smooth" });
+      else document.getElementById("lanc-descricao").focus();
     }
 
     function listaFiltrada() {
@@ -1905,12 +2139,12 @@ img { max-width: 100%; }
 
       tbody.innerHTML = lista.map(function (l) {
         var entrada = l.tipo === "entrada";
-        var classes = [];
+        var classes = ["mz-lanc-row"];
         if (Number(l.id) === Number(editandoId)) classes.push("is-editing");
         if (Number(l.id) === Number(destacarId)) classes.push("is-nova");
         return "<tr" + (classes.length ? ' class="' + classes.join(" ") + '"' : "") + ">" +
           '<td data-label="Data">' + fmt.dateShort(fromISO(l.data)) + "</td>" +
-          '<td data-label="Descrição"><span class="mz-dot mz-dot--' + l.tipo + '"></span>' + fmt.escapeHtml(l.descricao) + "</td>" +
+          '<td data-label="Descrição"><span><span class="mz-dot mz-dot--' + l.tipo + '"></span>' + fmt.escapeHtml(l.descricao) + "</span></td>" +
           '<td data-label="Categoria">' + fmt.escapeHtml(l.categoria) + "</td>" +
           '<td class="num mz-value--' + (entrada ? "positive" : "negative") + '" data-label="Valor">' + (entrada ? "+" : "−") + fmt.currency(l.valor) + "</td>" +
           '<td class="num" data-label="Ações"><span class="mz-row-actions">' +
@@ -2106,7 +2340,7 @@ img { max-width: 100%; }
         ui.limparAlerta("conta-modal-alert");
         document.getElementById("conta-vencimento").value = hojeISO();
         ui.abrirModal("conta-modal-backdrop");
-        document.getElementById("conta-nome").focus();
+        if (!TOQUE) document.getElementById("conta-nome").focus();
       });
       document.getElementById("conta-modal-cancelar").addEventListener("click", function () { ui.fecharModal("conta-modal-backdrop"); });
 
@@ -2464,7 +2698,7 @@ img { max-width: 100%; }
                 '<button class="mz-icon-btn mz-icon-btn--danger" type="button" title="Excluir" data-excluir="' + m.id + '">' + ICONS.trash + "</button>" +
               "</span></td>"
             : "";
-          return "<tr>" +
+          return '<tr class="mz-mat-row">' +
             '<td data-label="Material">' + fmt.escapeHtml(m.nome) + "</td>" +
             '<td data-label="Unidade"><span class="mz-unit">' + fmt.escapeHtml(m.unidade) + "</span></td>" +
             '<td class="num" data-label="Preço Unit.">' + fmt.currency(m.preco_unitario) + "</td>" +
@@ -2500,7 +2734,7 @@ img { max-width: 100%; }
       document.getElementById("material-form").reset();
       document.getElementById("material-id").value = "";
       ui.abrirModal("material-modal-backdrop");
-      document.getElementById("material-nome").focus();
+      if (!TOQUE) document.getElementById("material-nome").focus();
     }
 
     function abrirEdicao(id) {
@@ -2516,7 +2750,7 @@ img { max-width: 100%; }
       document.getElementById("material-estoque").value = m.quantidade_estoque;
       document.getElementById("material-minimo").value = m.estoque_minimo;
       ui.abrirModal("material-modal-backdrop");
-      document.getElementById("material-nome").focus();
+      if (!TOQUE) document.getElementById("material-nome").focus();
     }
 
     function init() {

@@ -3,13 +3,16 @@
 -- =============================================================================
 USE mazflow;
 
-CREATE TABLE lancamentos (
+CREATE TABLE IF NOT EXISTS lancamentos (
   id         INT UNSIGNED   NOT NULL AUTO_INCREMENT,
   data       DATE           NOT NULL,
   descricao  VARCHAR(200)   NOT NULL,
   categoria  VARCHAR(60)    NOT NULL,
   tipo       ENUM('entrada','saida') NOT NULL,
   valor      DECIMAL(12,2)  NOT NULL,
+  criado_por          INT UNSIGNED   NULL COMMENT 'quem cadastrou (usuarios.id)',
+  criado_em           DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  atualizado_em       DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (id),
   KEY ix_lancamentos_data (data),
   CONSTRAINT ck_lancamentos_valor CHECK (valor > 0)

@@ -10,6 +10,8 @@
 --   04_contas_fixas.sql  contas do mês (usa lançamentos)
 --   05_orcamentos.sql    orçamentos e itens (usa materiais)
 --   06_fluxo_caixa.sql   histórico e gráfico de 6 meses (usa lançamentos)
+--   07_acesso.sql        sessões, recuperação de senha e bloqueio de IP
+--   08_auditoria.sql     registro de quem alterou o quê
 --
 -- As datas são relativas ao dia em que os scripts rodam (CURDATE()),
 -- igual ao protótipo, que sempre usa "hoje" de quem abre.

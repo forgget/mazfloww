@@ -6,7 +6,7 @@
 -- =============================================================================
 USE mazflow;
 
-CREATE TABLE fluxo_historico (
+CREATE TABLE IF NOT EXISTS fluxo_historico (
   mes       DATE           NOT NULL COMMENT 'primeiro dia do mês',
   entradas  DECIMAL(12,2)  NOT NULL DEFAULT 0,
   saidas    DECIMAL(12,2)  NOT NULL DEFAULT 0,
@@ -22,7 +22,7 @@ INSERT INTO fluxo_historico (mes, entradas, saidas) VALUES
   (DATE_FORMAT(CURDATE() - INTERVAL 1 MONTH, '%Y-%m-01'), 15800, 10900);
 
 -- Os 6 meses do gráfico, com saldo
-CREATE VIEW vw_fluxo_mensal AS
+CREATE OR REPLACE VIEW vw_fluxo_mensal AS
 SELECT mes, entradas, saidas, entradas - saidas AS saldo FROM fluxo_historico
 UNION ALL
 SELECT DATE_FORMAT(CURDATE(), '%Y-%m-01'),

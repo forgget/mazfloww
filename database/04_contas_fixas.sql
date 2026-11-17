@@ -4,13 +4,16 @@
 -- =============================================================================
 USE mazflow;
 
-CREATE TABLE contas_fixas (
+CREATE TABLE IF NOT EXISTS contas_fixas (
   id             INT UNSIGNED   NOT NULL AUTO_INCREMENT,
   nome           VARCHAR(120)   NOT NULL,
   valor          DECIMAL(12,2)  NOT NULL,
   vencimento     DATE           NOT NULL,
   status         ENUM('pendente','pago') NOT NULL DEFAULT 'pendente',
   lancamento_id  INT UNSIGNED   NULL,
+  criado_por          INT UNSIGNED   NULL COMMENT 'quem cadastrou (usuarios.id)',
+  criado_em           DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  atualizado_em       DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (id),
   KEY ix_contas_fixas_vencimento (vencimento),
   CONSTRAINT fk_contas_fixas_lancamento FOREIGN KEY (lancamento_id)
@@ -28,7 +31,7 @@ INSERT INTO contas_fixas (id, nome, valor, vencimento, status, lancamento_id) VA
   (7, 'Licença CorelDRAW + RIP',  189.00,  CURDATE() - INTERVAL 9 DAY,  'pago',     NULL);
 
 -- Contas pendentes e a situação de cada uma
-CREATE VIEW vw_contas_a_vencer AS
+CREATE OR REPLACE VIEW vw_contas_a_vencer AS
 SELECT id, nome, valor, vencimento, DATEDIFF(vencimento, CURDATE()) AS dias_restantes,
        CASE WHEN vencimento < CURDATE() THEN 'vencida'
             WHEN vencimento <= CURDATE() + INTERVAL 3 DAY THEN 'vence em breve'

@@ -3,13 +3,16 @@
 -- =============================================================================
 USE mazflow;
 
-CREATE TABLE materiais (
+CREATE TABLE IF NOT EXISTS materiais (
   id                  INT UNSIGNED   NOT NULL AUTO_INCREMENT,
   nome                VARCHAR(120)   NOT NULL,
   unidade             VARCHAR(20)    NOT NULL,
   preco_unitario      DECIMAL(10,2)  NOT NULL DEFAULT 0,
   quantidade_estoque  DECIMAL(10,2)  NOT NULL DEFAULT 0,
   estoque_minimo      DECIMAL(10,2)  NOT NULL DEFAULT 0,
+  criado_por          INT UNSIGNED   NULL COMMENT 'quem cadastrou (usuarios.id)',
+  criado_em           DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  atualizado_em       DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (id),
   CONSTRAINT ck_materiais_preco   CHECK (preco_unitario >= 0),
   CONSTRAINT ck_materiais_estoque CHECK (quantidade_estoque >= 0 AND estoque_minimo >= 0)
@@ -32,7 +35,7 @@ INSERT INTO materiais (id, nome, unidade, preco_unitario, quantidade_estoque, es
   (14, 'Ilhós metálico 10mm',          'un',       0.35,   400, 150);
 
 -- Itens abaixo do estoque mínimo
-CREATE VIEW vw_materiais_em_falta AS
+CREATE OR REPLACE VIEW vw_materiais_em_falta AS
 SELECT id, nome, unidade, quantidade_estoque, estoque_minimo
 FROM materiais
 WHERE quantidade_estoque < estoque_minimo;

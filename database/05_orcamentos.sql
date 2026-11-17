@@ -4,7 +4,7 @@
 -- =============================================================================
 USE mazflow;
 
-CREATE TABLE orcamentos (
+CREATE TABLE IF NOT EXISTS orcamentos (
   id               INT UNSIGNED   NOT NULL AUTO_INCREMENT,
   nome_servico     VARCHAR(160)   NOT NULL,
   cliente          VARCHAR(120)   NOT NULL,
@@ -12,11 +12,14 @@ CREATE TABLE orcamentos (
   margem           DECIMAL(5,2)   NOT NULL COMMENT 'percentual sobre o preço de venda',
   custo_materiais  DECIMAL(12,2)  NOT NULL DEFAULT 0,
   valor_sugerido   DECIMAL(12,2)  NOT NULL DEFAULT 0,
+  criado_por          INT UNSIGNED   NULL COMMENT 'quem cadastrou (usuarios.id)',
+  criado_em           DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  atualizado_em       DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (id),
   CONSTRAINT ck_orcamentos_margem CHECK (margem >= 0 AND margem <= 100)
 ) ENGINE=InnoDB;
 
-CREATE TABLE orcamento_itens (
+CREATE TABLE IF NOT EXISTS orcamento_itens (
   id           INT UNSIGNED   NOT NULL AUTO_INCREMENT,
   orcamento_id INT UNSIGNED   NOT NULL,
   material_id  INT UNSIGNED   NOT NULL,

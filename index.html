@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#0033ff">
 <title>MazFlow</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%230033ff'/%3E%3Ctext x='16' y='21' font-family='Arial' font-weight='700' font-size='13' fill='white' text-anchor='middle'%3EMF%3C/text%3E%3C/svg%3E" />
 <style>
 :root {
   --color-primary: #0033ff;
@@ -72,6 +73,30 @@ img { max-width: 100%; }
 .mz-login__sub { color: var(--color-gray); font-size: 14px; margin: 0 0 24px; }
 .mz-login__hint { font-size: 12px; color: var(--color-gray); text-align: center; margin: 16px 0 0; line-height: 1.6; }
 .mz-login__hint strong { color: var(--color-black); }
+#view-login.is-detectando .mz-login__card { visibility: hidden; }
+.mz-login__titulo { font-size: 18px; margin: 0 0 6px; }
+.mz-login__texto { color: var(--color-gray); font-size: 14px; line-height: 1.5; margin: 0 0 18px; }
+.mz-login__troca { text-align: center; font-size: 14px; color: var(--color-gray); margin: 18px 0 0; }
+.mz-login__ou { display: flex; align-items: center; gap: 12px; margin: 18px 0; color: var(--color-gray); font-size: 13px; }
+.mz-login__ou::before, .mz-login__ou::after { content: ""; flex: 1; height: 1px; background: var(--color-border); }
+.mz-login__aviso-icone { width: 52px; height: 52px; border-radius: 999px; background: var(--color-active-bg); color: var(--color-primary); display: flex; align-items: center; justify-content: center; margin: 4px 0 14px; }
+.mz-field__topo { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
+.mz-field__dica { font-size: 12px; color: var(--color-gray); }
+.mz-google-wrap { display: flex; justify-content: center; min-height: 44px; }
+.mz-google-wrap:empty { display: none; }
+.mz-login__ou:has(+ .mz-google-wrap:empty) { display: none; }
+.mz-google-demo { display: inline-flex; align-items: center; justify-content: center; gap: 10px; width: 100%; min-height: 44px; border: 1px solid #dadce0; border-radius: 8px; background: #fff; color: #3c4043; font-size: 14px; font-weight: 600; cursor: pointer; font-family: inherit; }
+.mz-google-demo:hover { background: #f8f9fa; }
+
+/* Usuários e acesso */
+.mz-acesso-lista { display: flex; flex-direction: column; }
+.mz-acesso-item { display: flex; align-items: center; gap: 14px; padding: 14px 0; border-bottom: 1px solid var(--color-border); flex-wrap: wrap; }
+.mz-acesso-item:last-child { border-bottom: none; }
+.mz-acesso-item__info { flex: 1; min-width: 200px; }
+.mz-acesso-item__nome { font-weight: 600; font-size: 15px; }
+.mz-acesso-item__meta { font-size: 13px; color: var(--color-gray); margin-top: 2px; overflow-wrap: anywhere; }
+.mz-acesso-item__acoes { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+.mz-acesso-vazio { color: var(--color-gray); font-size: 14px; padding: 8px 0; }
 
 /* ===================== Topbar ===================== */
 .mz-topbar {
@@ -713,28 +738,100 @@ body.is-locked { overflow: hidden; }
     </div>
     <p class="mz-login__sub">Controle financeiro da Gráfica Mazart</p>
 
-    <div id="login-alert"></div>
+    <div id="login-alert" aria-live="polite"></div>
 
-    <form id="login-form">
-      <div class="mz-field">
-        <label for="login-usuario">Usuário</label>
-        <input class="mz-input" type="text" id="login-usuario" value="mazart" autocapitalize="none" autocorrect="off" spellcheck="false" autocomplete="username" required />
-      </div>
-      <div class="mz-field">
-        <label for="login-senha">Senha</label>
-        <input class="mz-input" type="password" id="login-senha" value="demo1234" autocomplete="current-password" required />
-      </div>
-      <div class="mz-field">
-        <label for="login-papel">Entrar como</label>
-        <select class="mz-select" id="login-papel">
-          <option value="administrador">Administrador — acesso total</option>
-          <option value="funcionario">Funcionário — sem editar materiais</option>
-        </select>
-      </div>
-      <button class="mz-btn mz-btn--primary mz-btn--block" type="submit">Entrar no sistema</button>
-    </form>
+    <!-- Entrar -->
+    <div class="mz-login__painel" id="painel-entrar">
+      <form id="login-form" novalidate>
+        <div class="mz-field">
+          <label for="login-usuario">E-mail</label>
+          <input class="mz-input" type="email" id="login-usuario" value="dono@mazart.demo" inputmode="email" autocapitalize="none" autocorrect="off" spellcheck="false" autocomplete="username" required />
+        </div>
+        <div class="mz-field">
+          <div class="mz-field__topo">
+            <label for="login-senha">Senha</label>
+            <button type="button" class="mz-link" data-painel="esqueci">Esqueci minha senha</button>
+          </div>
+          <input class="mz-input" type="password" id="login-senha" value="demo1234" autocomplete="current-password" required />
+        </div>
+        <button class="mz-btn mz-btn--primary mz-btn--block" type="submit" id="login-entrar">Entrar</button>
+      </form>
 
-    <p class="mz-login__hint">Protótipo de demonstração. Usuário <strong>mazart</strong> · senha <strong>demo1234</strong> já preenchidos.<br />Os dados ficam salvos só neste navegador.</p>
+      <div class="mz-login__ou"><span>ou</span></div>
+      <div id="google-botao" class="mz-google-wrap"></div>
+
+      <p class="mz-login__troca">Ainda não tem conta? <button type="button" class="mz-link" data-painel="cadastro">Criar conta</button></p>
+    </div>
+
+    <!-- Criar conta -->
+    <div class="mz-login__painel" id="painel-cadastro" hidden>
+      <h2 class="mz-login__titulo">Criar conta</h2>
+      <p class="mz-login__texto">Depois do cadastro, o administrador da gráfica aprova o seu acesso.</p>
+      <form id="cadastro-form" novalidate>
+        <div class="mz-field">
+          <label for="cadastro-nome">Nome</label>
+          <input class="mz-input" type="text" id="cadastro-nome" autocomplete="name" autocapitalize="words" maxlength="120" required />
+        </div>
+        <div class="mz-field">
+          <label for="cadastro-email">E-mail</label>
+          <input class="mz-input" type="email" id="cadastro-email" inputmode="email" autocapitalize="none" autocorrect="off" spellcheck="false" autocomplete="email" maxlength="190" required />
+        </div>
+        <div class="mz-field">
+          <label for="cadastro-senha">Senha</label>
+          <input class="mz-input" type="password" id="cadastro-senha" autocomplete="new-password" minlength="8" maxlength="200" required />
+          <span class="mz-field__dica">Pelo menos 8 caracteres.</span>
+        </div>
+        <div class="mz-field">
+          <label for="cadastro-senha2">Confirmar senha</label>
+          <input class="mz-input" type="password" id="cadastro-senha2" autocomplete="new-password" maxlength="200" required />
+        </div>
+        <button class="mz-btn mz-btn--primary mz-btn--block" type="submit">Criar conta</button>
+      </form>
+      <p class="mz-login__troca">Já tem conta? <button type="button" class="mz-link" data-painel="entrar">Entrar</button></p>
+    </div>
+
+    <!-- Esqueci a senha -->
+    <div class="mz-login__painel" id="painel-esqueci" hidden>
+      <h2 class="mz-login__titulo">Recuperar senha</h2>
+      <p class="mz-login__texto">Informe o e-mail da sua conta. Enviaremos um link para você criar uma nova senha.</p>
+      <form id="esqueci-form" novalidate>
+        <div class="mz-field">
+          <label for="esqueci-email">E-mail</label>
+          <input class="mz-input" type="email" id="esqueci-email" inputmode="email" autocapitalize="none" autocorrect="off" spellcheck="false" autocomplete="email" required />
+        </div>
+        <button class="mz-btn mz-btn--primary mz-btn--block" type="submit">Enviar link</button>
+      </form>
+      <p class="mz-login__troca"><button type="button" class="mz-link" data-painel="entrar">Voltar para o login</button></p>
+    </div>
+
+    <!-- Nova senha (aberto pelo link do e-mail) -->
+    <div class="mz-login__painel" id="painel-redefinir" hidden>
+      <h2 class="mz-login__titulo">Criar nova senha</h2>
+      <p class="mz-login__texto">Depois de salvar, todas as sessões abertas com a senha antiga são encerradas.</p>
+      <form id="redefinir-form" novalidate>
+        <div class="mz-field">
+          <label for="redefinir-senha">Nova senha</label>
+          <input class="mz-input" type="password" id="redefinir-senha" autocomplete="new-password" minlength="8" maxlength="200" required />
+          <span class="mz-field__dica">Pelo menos 8 caracteres.</span>
+        </div>
+        <div class="mz-field">
+          <label for="redefinir-senha2">Confirmar nova senha</label>
+          <input class="mz-input" type="password" id="redefinir-senha2" autocomplete="new-password" maxlength="200" required />
+        </div>
+        <button class="mz-btn mz-btn--primary mz-btn--block" type="submit">Salvar nova senha</button>
+      </form>
+      <p class="mz-login__troca"><button type="button" class="mz-link" data-painel="entrar">Voltar para o login</button></p>
+    </div>
+
+    <!-- Aviso (cadastro recebido, conta pendente) -->
+    <div class="mz-login__painel" id="painel-aviso" hidden>
+      <div class="mz-login__aviso-icone" aria-hidden="true"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg></div>
+      <h2 class="mz-login__titulo" id="aviso-titulo">Aguardando aprovação</h2>
+      <p class="mz-login__texto" id="aviso-texto"></p>
+      <button type="button" class="mz-btn mz-btn--secondary mz-btn--block" data-painel="entrar">Voltar para o login</button>
+    </div>
+
+    <p class="mz-login__hint" id="login-hint-demo">Demonstração: e-mail e senha já preenchidos. Na demonstração, os dados ficam só neste navegador.</p>
   </div>
 </div>
 
@@ -1049,6 +1146,39 @@ body.is-locked { overflow: hidden; }
         </div>
       </section>
 
+      <!-- ===================== USUÁRIOS E ACESSO (só administrador, com servidor) ===================== -->
+      <section id="view-usuarios" class="mz-view" hidden>
+        <div class="mz-page-header">
+          <div>
+            <h1>Usuários e acesso</h1>
+            <p>Aprove cadastros, defina quem é administrador e libere redes bloqueadas</p>
+          </div>
+        </div>
+
+        <div id="usuarios-alert"></div>
+
+        <div class="mz-card">
+          <div class="mz-section-header"><h2>Aguardando aprovação</h2></div>
+          <div class="mz-acesso-lista" id="usuarios-pendentes"></div>
+        </div>
+
+        <div class="mz-card">
+          <div class="mz-section-header"><h2>Com acesso</h2></div>
+          <div class="mz-acesso-lista" id="usuarios-ativos"></div>
+        </div>
+
+        <div class="mz-card">
+          <div class="mz-section-header"><h2>Redes bloqueadas</h2></div>
+          <p class="mz-kpi-hint" style="margin:-6px 0 10px;" id="bloqueios-seu-ip"></p>
+          <div class="mz-acesso-lista" id="usuarios-bloqueios"></div>
+        </div>
+
+        <div class="mz-card" id="usuarios-inativos-card" hidden>
+          <div class="mz-section-header"><h2>Sem acesso</h2></div>
+          <div class="mz-acesso-lista" id="usuarios-inativos"></div>
+        </div>
+      </section>
+
     </main>
   </div>
 </div>
@@ -1305,7 +1435,35 @@ body.is-locked { overflow: hidden; }
     }
 
     var state = loadState();
-    function save() { persist(state); }
+
+    /* --- modo servidor ---------------------------------------------------
+       Os dados vêm da API e ficam SÓ na memória da página (nada financeiro é
+       gravado no aparelho). Cada alteração atualiza a tela na hora e entra
+       numa fila que envia ao servidor; registros novos usam um id temporário
+       (negativo) até o servidor devolver o id definitivo. */
+    var remoto = null;
+    var idReal = {};
+    var proximoTemp = -1;
+    function real(id) { var n = Number(id); return idReal[n] || n; }
+    function mesmo(a, b) { return a != null && b != null && real(a) === real(b); }
+    function idTemporario() { return proximoTemp--; }
+    function enviar(metodo, caminho, corpo, aoConcluir) {
+      if (remoto) remoto(metodo, caminho, corpo, aoConcluir);
+    }
+    function usarServidor(fn) {
+      remoto = fn;
+      try { localStorage.removeItem(STORAGE_KEY); } catch (e) { /* ignora */ }
+    }
+    function carregarServidor(d) {
+      state.materiais = d.materiais;
+      state.lancamentos = d.lancamentos;
+      state.contasFixas = d.contasFixas;
+      state.orcamentos = d.orcamentos;
+      state.historicoFluxo = d.historicoFluxo;
+      idReal = {};
+    }
+
+    function save() { if (!remoto) persist(state); }
 
     function resetDemo() {
       try { localStorage.removeItem(STORAGE_KEY); } catch (e) {}
@@ -1321,6 +1479,11 @@ body.is-locked { overflow: hidden; }
       state.sessao = { autenticado: true, usuario: usuario, papel: papel === "funcionario" ? "funcionario" : "administrador" };
       save();
     }
+    // Com servidor: quem está logado vem da API (o cookie de sessão é httpOnly).
+    function setSessaoServidor(u) {
+      state.sessao = { autenticado: true, usuario: u.nome, email: u.email, papel: u.papel === "administrador" ? "administrador" : "funcionario" };
+      save();
+    }
     function logout() { state.sessao.autenticado = false; save(); }
     function isAdmin() { return state.sessao.papel === "administrador"; }
 
@@ -1328,11 +1491,14 @@ body.is-locked { overflow: hidden; }
     function getMateriais() {
       return state.materiais.slice().sort(function (a, b) { return a.nome.localeCompare(b.nome, "pt-BR"); });
     }
-    function getMaterial(id) { return state.materiais.find(function (m) { return Number(m.id) === Number(id); }); }
+    function getMaterial(id) { return state.materiais.find(function (m) { return mesmo(m.id, id); }); }
     function isEstoqueBaixo(m) { return Number(m.quantidade_estoque) < Number(m.estoque_minimo); }
     function materiaisEmFalta() { return getMateriais().filter(isEstoqueBaixo); }
     function valorEmEstoque(m) { return Number(m.preco_unitario) * Number(m.quantidade_estoque); }
     function totalEmEstoque() { return state.materiais.reduce(function (s, m) { return s + valorEmEstoque(m); }, 0); }
+    function corpoMaterial(m) {
+      return { nome: m.nome, unidade: m.unidade, preco_unitario: m.preco_unitario, quantidade_estoque: m.quantidade_estoque, estoque_minimo: m.estoque_minimo };
+    }
     function saveMaterial(d) {
       if (d.id) {
         var ex = getMaterial(d.id);
@@ -1341,27 +1507,34 @@ body.is-locked { overflow: hidden; }
           ex.preco_unitario = Number(d.preco_unitario);
           ex.quantidade_estoque = Number(d.quantidade_estoque);
           ex.estoque_minimo = Number(d.estoque_minimo);
-          save(); return ex;
+          save();
+          enviar("PUT", function () { return "api/materiais/" + real(ex.id); }, corpoMaterial(ex));
+          return ex;
         }
       }
       var novo = {
-        id: state.nextIds.material++, nome: d.nome, unidade: d.unidade,
+        id: remoto ? idTemporario() : state.nextIds.material++, nome: d.nome, unidade: d.unidade,
         preco_unitario: Number(d.preco_unitario),
         quantidade_estoque: Number(d.quantidade_estoque),
         estoque_minimo: Number(d.estoque_minimo)
       };
-      state.materiais.push(novo); save(); return novo;
+      state.materiais.push(novo); save();
+      var temp = novo.id;
+      enviar("POST", "api/materiais", corpoMaterial(novo), function (r) { idReal[temp] = r.material.id; novo.id = r.material.id; });
+      return novo;
     }
     function deleteMaterial(id) {
-      state.materiais = state.materiais.filter(function (m) { return Number(m.id) !== Number(id); });
+      var alvo = real(id);
+      state.materiais = state.materiais.filter(function (m) { return !mesmo(m.id, id); });
       save();
+      enviar("DELETE", function () { return "api/materiais/" + real(alvo); });
     }
 
     /* --- contas fixas --- */
     function getContasFixas() {
       return state.contasFixas.slice().sort(function (a, b) { return a.vencimento.localeCompare(b.vencimento); });
     }
-    function getContaFixa(id) { return state.contasFixas.find(function (c) { return Number(c.id) === Number(id); }); }
+    function getContaFixa(id) { return state.contasFixas.find(function (c) { return mesmo(c.id, id); }); }
     function contasPendentes() { return state.contasFixas.filter(function (c) { return c.status === "pendente"; }); }
     function contasEmAlerta() {
       return contasPendentes().filter(function (c) { return diasRestantes(c.vencimento) <= 3; })
@@ -1371,9 +1544,16 @@ body.is-locked { overflow: hidden; }
       var c = getContaFixa(id);
       if (!c || c.status === "pago") return null;
       c.status = "pago";
-      var lanc = addLancamento({ data: hojeISO(), descricao: c.nome + " — conta fixa", categoria: "Outros", tipo: "saida", valor: c.valor });
+      var dataPagamento = hojeISO();
+      var lanc = criarLancamentoLocal({ data: dataPagamento, descricao: c.nome + " — conta fixa", categoria: "Outros", tipo: "saida", valor: c.valor });
       c.lancamentoId = lanc.id;
       save();
+      var tempLanc = lanc.id;
+      enviar("POST", function () { return "api/contas/" + real(c.id) + "/pagar"; }, { data: dataPagamento }, function (r) {
+        idReal[tempLanc] = r.lancamento.id;
+        lanc.id = r.lancamento.id;
+        c.lancamentoId = r.lancamento.id;
+      });
       return c;
     }
     function desfazerPagamento(id) {
@@ -1382,17 +1562,23 @@ body.is-locked { overflow: hidden; }
       c.status = "pendente";
       if (c.lancamentoId) { removerLancamento(c.lancamentoId); c.lancamentoId = null; }
       save();
+      enviar("POST", function () { return "api/contas/" + real(c.id) + "/desfazer"; }, {});
       return c;
     }
     function addContaFixa(d) {
-      var n = { id: state.nextIds.contaFixa++, nome: d.nome, valor: Number(d.valor), vencimento: d.vencimento, status: "pendente", lancamentoId: null };
-      state.contasFixas.push(n); save(); return n;
+      var n = { id: remoto ? idTemporario() : state.nextIds.contaFixa++, nome: d.nome, valor: Number(d.valor), vencimento: d.vencimento, status: "pendente", lancamentoId: null };
+      state.contasFixas.push(n); save();
+      var temp = n.id;
+      enviar("POST", "api/contas", { nome: n.nome, valor: n.valor, vencimento: n.vencimento }, function (r) { idReal[temp] = r.conta.id; n.id = r.conta.id; });
+      return n;
     }
     function deleteContaFixa(id) {
       var c = getContaFixa(id);
+      var alvo = real(id);
       if (c && c.lancamentoId) removerLancamento(c.lancamentoId);
-      state.contasFixas = state.contasFixas.filter(function (x) { return Number(x.id) !== Number(id); });
+      state.contasFixas = state.contasFixas.filter(function (x) { return !mesmo(x.id, id); });
       save();
+      enviar("DELETE", function () { return "api/contas/" + real(alvo); });
     }
     function totaisContasFixas() {
       var t = { total: 0, pendente: 0, pago: 0 };
@@ -1409,30 +1595,46 @@ body.is-locked { overflow: hidden; }
         return a.data !== b.data ? b.data.localeCompare(a.data) : b.id - a.id;
       });
     }
-    function getLancamento(id) { return state.lancamentos.find(function (l) { return Number(l.id) === Number(id); }); }
-    function addLancamento(d) {
+    function getLancamento(id) { return state.lancamentos.find(function (l) { return mesmo(l.id, id); }); }
+    function corpoLancamento(l) {
+      return { data: l.data, descricao: l.descricao, categoria: l.categoria, tipo: l.tipo, valor: l.valor };
+    }
+    // Só na memória (usado também pelo pagamento de conta, que o servidor faz junto).
+    function criarLancamentoLocal(d) {
       var n = {
-        id: state.nextIds.lancamento++, data: d.data || hojeISO(), descricao: d.descricao,
+        id: remoto ? idTemporario() : state.nextIds.lancamento++, data: d.data || hojeISO(), descricao: d.descricao,
         categoria: d.categoria, tipo: d.tipo === "entrada" ? "entrada" : "saida", valor: Number(d.valor)
       };
-      state.lancamentos.push(n); save(); return n;
+      state.lancamentos.push(n);
+      return n;
+    }
+    function addLancamento(d) {
+      var n = criarLancamentoLocal(d);
+      save();
+      var temp = n.id;
+      enviar("POST", "api/lancamentos", corpoLancamento(n), function (r) { idReal[temp] = r.lancamento.id; n.id = r.lancamento.id; });
+      return n;
     }
     function updateLancamento(id, d) {
       var l = getLancamento(id);
       if (!l) return null;
       l.data = d.data; l.descricao = d.descricao; l.categoria = d.categoria;
       l.tipo = d.tipo === "entrada" ? "entrada" : "saida"; l.valor = Number(d.valor);
-      save(); return l;
+      save();
+      enviar("PUT", function () { return "api/lancamentos/" + real(l.id); }, corpoLancamento(l));
+      return l;
     }
     function removerLancamento(id) {
-      state.lancamentos = state.lancamentos.filter(function (l) { return Number(l.id) !== Number(id); });
+      state.lancamentos = state.lancamentos.filter(function (l) { return !mesmo(l.id, id); });
     }
     function deleteLancamento(id) {
       // se era o lançamento gerado por uma conta paga, a conta volta a pendente
-      var conta = state.contasFixas.find(function (c) { return Number(c.lancamentoId) === Number(id); });
+      var conta = state.contasFixas.find(function (c) { return mesmo(c.lancamentoId, id); });
       if (conta) { conta.status = "pendente"; conta.lancamentoId = null; }
+      var alvo = real(id);
       removerLancamento(id);
       save();
+      enviar("DELETE", function () { return "api/lancamentos/" + real(alvo); });
       return conta;
     }
     function totaisHoje() {
@@ -1473,22 +1675,37 @@ body.is-locked { overflow: hidden; }
     function getOrcamentos() {
       return state.orcamentos.slice().sort(function (a, b) { return b.id - a.id; });
     }
-    function getOrcamento(id) { return state.orcamentos.find(function (o) { return Number(o.id) === Number(id); }); }
+    function getOrcamento(id) { return state.orcamentos.find(function (o) { return mesmo(o.id, id); }); }
     function saveOrcamento(d) {
       var n = {
-        id: state.nextIds.orcamento++, nomeServico: d.nomeServico, cliente: d.cliente, data: hojeISO(),
+        id: remoto ? idTemporario() : state.nextIds.orcamento++, nomeServico: d.nomeServico, cliente: d.cliente, data: hojeISO(),
         margem: Number(d.margem), itens: d.itens, custoMateriais: Number(d.custoMateriais), valorSugerido: Number(d.valorSugerido)
       };
-      state.orcamentos.push(n); save(); return n;
+      state.orcamentos.push(n); save();
+      var temp = n.id;
+      enviar("POST", "api/orcamentos", function () {
+        return {
+          nomeServico: n.nomeServico, cliente: n.cliente, margem: n.margem,
+          itens: n.itens.map(function (i) { return { materialId: real(i.materialId), quantidade: Number(i.quantidade) }; })
+        };
+      }, function (r) {
+        // o servidor recalcula com os preços do banco; a página passa a mostrar o valor dele
+        idReal[temp] = r.orcamento.id;
+        n.id = r.orcamento.id; n.data = r.orcamento.data;
+        n.custoMateriais = r.orcamento.custoMateriais; n.valorSugerido = r.orcamento.valorSugerido;
+      });
+      return n;
     }
     function deleteOrcamento(id) {
-      state.orcamentos = state.orcamentos.filter(function (o) { return Number(o.id) !== Number(id); });
+      var alvo = real(id);
+      state.orcamentos = state.orcamentos.filter(function (o) { return !mesmo(o.id, id); });
       save();
+      enviar("DELETE", function () { return "api/orcamentos/" + real(alvo); });
     }
 
     return {
-      resetDemo: resetDemo,
-      getSessao: getSessao, login: login, logout: logout, isAdmin: isAdmin,
+      resetDemo: resetDemo, usarServidor: usarServidor, carregarServidor: carregarServidor,
+      getSessao: getSessao, login: login, logout: logout, isAdmin: isAdmin, setSessaoServidor: setSessaoServidor,
       getMateriais: getMateriais, getMaterial: getMaterial, isEstoqueBaixo: isEstoqueBaixo, materiaisEmFalta: materiaisEmFalta,
       valorEmEstoque: valorEmEstoque, totalEmEstoque: totalEmEstoque, saveMaterial: saveMaterial, deleteMaterial: deleteMaterial,
       getContasFixas: getContasFixas, getContaFixa: getContaFixa, contasPendentes: contasPendentes, contasEmAlerta: contasEmAlerta,
@@ -1616,6 +1833,90 @@ body.is-locked { overflow: hidden; }
   })();
 
   /* =========================================================================
+     Servidor — quando a página é aberta pelo servidor do MazFlow, o login é
+     real (API). No GitHub Pages ou abrindo o arquivo, continua sendo a demo.
+     Caminhos relativos ("api/...") para funcionar em qualquer pasta.
+     ========================================================================= */
+  var servidor = (function () {
+    var ativo = false;
+    var googleClientId = null;
+
+    function detectar() {
+      if (location.protocol === "file:" || !window.fetch) return Promise.resolve(false);
+      var ctrl = window.AbortController ? new AbortController() : null;
+      var timer = window.setTimeout(function () { if (ctrl) ctrl.abort(); }, 4000);
+      return fetch("api/config", { credentials: "same-origin", headers: { Accept: "application/json" }, signal: ctrl ? ctrl.signal : undefined })
+        .then(function (r) { window.clearTimeout(timer); return r.ok ? r.json() : null; })
+        .then(function (j) {
+          if (j && j.modo === "servidor") { ativo = true; googleClientId = j.googleClientId || null; }
+          return ativo;
+        })
+        .catch(function () { return false; });
+    }
+
+    function chamar(metodo, caminho, corpo) {
+      var opcoes = { method: metodo, credentials: "same-origin", headers: { Accept: "application/json" } };
+      if (corpo !== undefined) {
+        opcoes.headers["Content-Type"] = "application/json";
+        opcoes.body = JSON.stringify(corpo);
+      }
+      return fetch(caminho, opcoes)
+        .then(function (r) {
+          return r.json().catch(function () { return {}; }).then(function (json) { return { status: r.status, json: json || {} }; });
+        })
+        .catch(function () {
+          return { status: 0, json: { mensagem: "Sem conexão com o servidor. Confira a internet e tente de novo." } };
+        });
+    }
+
+    // Fila de gravação: envia as alterações uma por vez, na ordem em que a
+    // pessoa fez. Se o servidor recusar uma, avisa e recarrega tudo do banco.
+    var fila = Promise.resolve();
+    var pendentes = 0;
+    var geracao = 0;
+    function enfileirar(metodo, caminho, corpo, aoConcluir) {
+      var minhaGeracao = geracao;
+      pendentes++;
+      fila = fila.then(function () {
+        if (minhaGeracao !== geracao) return null; // descartada depois de um erro
+        var c = typeof caminho === "function" ? caminho() : caminho;
+        var b = typeof corpo === "function" ? corpo() : corpo;
+        return chamar(metodo, c, b).then(function (r) {
+          if (r.status >= 200 && r.status < 300) { if (aoConcluir) aoConcluir(r.json); return null; }
+          geracao++;
+          if (r.status === 401) { auth.sessaoPerdida(); return null; }
+          ui.toast(r.json.mensagem || "Não foi possível salvar. Os dados foram recarregados.", "error");
+          return recarregar();
+        });
+      }).then(function () { pendentes--; }, function () { pendentes--; });
+    }
+
+    function recarregar() {
+      return chamar("GET", "api/dados").then(function (r) {
+        if (r.status === 401) { auth.sessaoPerdida(); return; }
+        if (r.status !== 200) return;
+        store.carregarServidor(r.json);
+        router.show(router.current);
+      });
+    }
+
+    window.addEventListener("beforeunload", function (ev) {
+      if (ativo && pendentes > 0) { ev.preventDefault(); ev.returnValue = ""; }
+    });
+
+    return {
+      detectar: detectar,
+      ativo: function () { return ativo; },
+      googleClientId: function () { return googleClientId; },
+      get: function (c) { return chamar("GET", c); },
+      post: function (c, corpo) { return chamar("POST", c, corpo || {}); },
+      enfileirar: enfileirar,
+      salvando: function () { return pendentes > 0; },
+      aguardarGravacoes: function () { return fila; }
+    };
+  })();
+
+  /* =========================================================================
      Ícones
      ========================================================================= */
   var ICONS = {
@@ -1694,9 +1995,13 @@ body.is-locked { overflow: hidden; }
               '<span class="mz-avatar">' + iniciais(EMPRESA) + '</span><span class="mz-user__name">' + fmt.escapeHtml(EMPRESA) + '</span><span class="mz-user__caret">▾</span></button>' +
               '<div class="mz-user__dropdown">' +
                 '<div class="mz-user__info"><strong>' + fmt.escapeHtml(sessao.usuario) + "</strong>" +
+                  (sessao.email ? "<span>" + fmt.escapeHtml(sessao.email) + "</span><br />" : "") +
                   "<span>" + (sessao.papel === "administrador" ? "Administrador" : "Funcionário") + " · " + fmt.escapeHtml(EMPRESA) + "</span></div>" +
-                '<button type="button" class="mz-menu-item" id="mz-trocar-papel">Trocar de perfil</button>' +
-                '<button type="button" class="mz-menu-item" id="mz-reset-dropdown">↺ Resetar dados da demonstração</button>' +
+                (servidor.ativo() && store.isAdmin()
+                  ? '<button type="button" class="mz-menu-item" data-route="usuarios">Usuários e acesso</button>'
+                  : "") +
+                (servidor.ativo() ? "" : '<button type="button" class="mz-menu-item" id="mz-trocar-papel">Trocar de perfil (demonstração)</button>') +
+                (servidor.ativo() ? "" : '<button type="button" class="mz-menu-item" id="mz-reset-dropdown">↺ Resetar dados da demonstração</button>') +
                 '<button type="button" class="mz-menu-item mz-menu-item--danger" id="mz-logout-dropdown">Sair do sistema</button>' +
               "</div></div>" +
           "</div></header>";
@@ -1717,14 +2022,16 @@ body.is-locked { overflow: hidden; }
           router.goto(btn.getAttribute("data-rota"));
         });
       });
-      document.getElementById("mz-trocar-papel").addEventListener("click", function () {
+      var trocarPapel = document.getElementById("mz-trocar-papel");
+      if (trocarPapel) trocarPapel.addEventListener("click", function () {
         document.getElementById("mz-user").classList.remove("open");
         var novo = store.isAdmin() ? "funcionario" : "administrador";
         store.login(store.getSessao().usuario, novo);
         ui.toast("Perfil alterado para " + (novo === "administrador" ? "Administrador" : "Funcionário") + ".", "info");
         router.show(router.current);
       });
-      document.getElementById("mz-reset-dropdown").addEventListener("click", function () {
+      var resetMenu = document.getElementById("mz-reset-dropdown");
+      if (resetMenu) resetMenu.addEventListener("click", function () {
         document.getElementById("mz-user").classList.remove("open");
         resetarDemo();
       });
@@ -1780,14 +2087,15 @@ body.is-locked { overflow: hidden; }
           '<nav class="mz-nav">' + itens + "</nav>" +
           "<div>" +
             '<button class="mz-logout-btn" type="button" id="mz-logout-sidebar">' + ICONS.logout + "<span>Sair</span></button>" +
-            '<button class="mz-reset-demo" type="button" id="mz-reset-demo">↺ Resetar dados da demonstração</button>' +
+            (servidor.ativo() ? "" : '<button class="mz-reset-demo" type="button" id="mz-reset-demo">↺ Resetar dados da demonstração</button>') +
           "</div></aside>" +
         '<nav class="mz-bottomnav" aria-label="Navegação principal">' + abas + "</nav>";
 
       document.body.classList.remove("is-locked");
       document.getElementById("mz-logout-sidebar").addEventListener("click", sair);
       document.getElementById("mz-overlay").addEventListener("click", function () { toggleSidebar(false); });
-      document.getElementById("mz-reset-demo").addEventListener("click", resetarDemo);
+      var reset = document.getElementById("mz-reset-demo");
+      if (reset) reset.addEventListener("click", resetarDemo);
     }
 
     function resetarDemo() {
@@ -1804,9 +2112,18 @@ body.is-locked { overflow: hidden; }
     }
 
     function sair() {
-      ui.confirmar("Sair do sistema", "Você voltará para a tela de login. Os dados da demonstração continuam salvos neste navegador.", function () {
-        store.logout();
-        auth.mostrarLogin();
+      var msg = servidor.ativo()
+        ? "Você voltará para a tela de login."
+        : "Você voltará para a tela de login. Os dados da demonstração continuam salvos neste navegador.";
+      ui.confirmar("Sair do sistema", msg, function () {
+        if (servidor.ativo()) {
+          servidor.aguardarGravacoes()
+            .then(function () { return servidor.post("api/auth/sair"); })
+            .then(function () { store.logout(); auth.limparERecarregar("saiu"); });
+        } else {
+          store.logout();
+          auth.mostrarLogin();
+        }
       }, "Sair");
     }
 
@@ -1819,13 +2136,232 @@ body.is-locked { overflow: hidden; }
      Autenticação
      ========================================================================= */
   var auth = (function () {
-    function mostrarLogin() {
+    var PAINEIS = ["entrar", "cadastro", "esqueci", "redefinir", "aviso"];
+    var EMAIL_OK = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+    var tokenRedefinir = null;
+    var googleCarregado = false;
+
+    function el(id) { return document.getElementById(id); }
+
+    function painel(nome) {
+      PAINEIS.forEach(function (p) { el("painel-" + p).hidden = p !== nome; });
+      ui.limparAlerta("login-alert");
+      var primeiro = el("painel-" + nome).querySelector("input");
+      if (primeiro && !TOQUE) primeiro.focus();
+    }
+
+    function aviso(titulo, texto) {
+      painel("aviso");
+      el("aviso-titulo").textContent = titulo;
+      el("aviso-texto").textContent = texto;
+    }
+
+    function ocupado(form, sim) {
+      var btn = form.querySelector('button[type="submit"]');
+      if (!btn) return;
+      if (sim) { btn.dataset.texto = btn.textContent; btn.textContent = "Aguarde…"; btn.disabled = true; }
+      else { btn.textContent = btn.dataset.texto || btn.textContent; btn.disabled = false; }
+    }
+
+    function mostrarLogin(qualPainel) {
       document.getElementById("mz-app").hidden = true;
       document.getElementById("view-login").hidden = false;
       document.getElementById("view-login").classList.remove("is-saindo");
-      ui.limparAlerta("login-alert");
-      document.getElementById("login-papel").value = store.getSessao().papel || "administrador";
+      painel(typeof qualPainel === "string" ? qualPainel : "entrar");
       window.scrollTo({ top: 0 });
+    }
+
+    // Logado no servidor: busca os dados da gráfica e abre o sistema.
+    function entrarComServidor(usuario, saudar) {
+      store.setSessaoServidor(usuario);
+      return servidor.get("api/dados").then(function (r) {
+        if (r.status === 401) { sessaoPerdida(); return; }
+        if (r.status !== 200) {
+          mostrarLogin();
+          ui.alerta("login-alert", r.json.mensagem || "Não foi possível carregar os dados. Tente de novo.", "error");
+          return;
+        }
+        store.carregarServidor(r.json);
+        mostrarApp();
+        if (saudar) ui.toast("Bem-vindo, " + usuario.nome.split(" ")[0] + "!", "info");
+      });
+    }
+
+    // Resposta do servidor depois de um login (senha ou Google).
+    function tratarRespostaLogin(r) {
+      if (r.status === 200 || r.status === 201) {
+        el("login-senha").value = "";
+        entrarComServidor(r.json.usuario, true);
+        return;
+      }
+      if (r.json.erro === "conta_pendente") {
+        aviso("Aguardando aprovação", "Seu cadastro já chegou para o administrador da gráfica. Assim que ele aprovar, você recebe um e-mail e pode entrar.");
+        return;
+      }
+      var msg = r.json.mensagem || "Não foi possível entrar. Tente de novo.";
+      if (r.json.erro === "credenciais" && r.json.tentativasRestantes > 0 && r.json.tentativasRestantes <= 2) {
+        msg += " Restam " + r.json.tentativasRestantes + (r.json.tentativasRestantes === 1 ? " tentativa" : " tentativas") + " antes de um bloqueio temporário.";
+      }
+      ui.alerta("login-alert", msg, "error");
+    }
+
+    function botaoGoogleDemo(alvo) {
+      alvo.innerHTML =
+        '<button type="button" class="mz-google-demo" id="google-demo">' +
+          '<svg width="18" height="18" viewBox="0 0 48 48" aria-hidden="true"><path fill="#EA4335" d="M24 9.5c3.5 0 6.6 1.2 9.1 3.6l6.8-6.8C35.8 2.4 30.3 0 24 0 14.6 0 6.6 5.4 2.7 13.3l7.9 6.1C12.5 13.6 17.8 9.5 24 9.5z"/><path fill="#4285F4" d="M46.5 24.5c0-1.6-.1-3.1-.4-4.5H24v9h12.7c-.6 3-2.3 5.5-4.8 7.2l7.7 6c4.5-4.2 6.9-10.3 6.9-17.7z"/><path fill="#FBBC05" d="M10.6 28.6c-.5-1.4-.8-3-.8-4.6s.3-3.2.8-4.6l-7.9-6.1C1 16.6 0 20.2 0 24s1 7.4 2.7 10.7l7.9-6.1z"/><path fill="#34A853" d="M24 48c6.5 0 11.9-2.1 15.9-5.8l-7.7-6c-2.1 1.4-4.9 2.3-8.2 2.3-6.2 0-11.5-4.1-13.4-9.9l-7.9 6.1C6.6 42.6 14.6 48 24 48z"/></svg>' +
+          "Entrar com Google</button>";
+      el("google-demo").addEventListener("click", function () {
+        ui.alerta("login-alert", "Na demonstração o login com Google não é feito. No sistema online, a conta Google entra direto (ou fica aguardando aprovação, se for nova).", "info");
+      });
+    }
+
+    function botaoGoogleReal(alvo) {
+      var clientId = servidor.googleClientId();
+      if (!clientId) { alvo.innerHTML = ""; return; }
+      function desenhar() {
+        window.google.accounts.id.initialize({
+          client_id: clientId,
+          ux_mode: "popup",
+          callback: function (resp) {
+            ui.alerta("login-alert", "Confirmando sua conta Google…", "info");
+            servidor.post("api/auth/google", { credential: resp.credential }).then(tratarRespostaLogin);
+          }
+        });
+        var largura = Math.min(400, Math.max(200, alvo.getBoundingClientRect().width || 320));
+        window.google.accounts.id.renderButton(alvo, { theme: "outline", size: "large", text: "signin_with", shape: "rectangular", locale: "pt-BR", width: largura });
+      }
+      if (window.google && window.google.accounts) { desenhar(); return; }
+      if (googleCarregado) return;
+      googleCarregado = true;
+      var s = document.createElement("script");
+      s.src = "https://accounts.google.com/gsi/client";
+      s.async = true;
+      s.onload = desenhar;
+      s.onerror = function () { alvo.innerHTML = ""; };
+      document.head.appendChild(s);
+    }
+
+    function prepararModo() {
+      var real = servidor.ativo();
+      el("login-hint-demo").hidden = real;
+      if (real) {
+        el("login-usuario").value = "";
+        el("login-senha").value = "";
+        botaoGoogleReal(el("google-botao"));
+      } else {
+        botaoGoogleDemo(el("google-botao"));
+      }
+    }
+
+    function ligarFormularios() {
+      document.querySelectorAll("[data-painel]").forEach(function (b) {
+        b.addEventListener("click", function () {
+          if (b.getAttribute("data-painel") === "esqueci") el("esqueci-email").value = el("login-usuario").value.trim();
+          painel(b.getAttribute("data-painel"));
+        });
+      });
+
+      // Entrar
+      el("login-form").addEventListener("submit", function (ev) {
+        ev.preventDefault();
+        var form = ev.currentTarget;
+        var email = el("login-usuario").value.trim();
+        var senha = el("login-senha").value;
+        if (!email || !senha) { ui.alerta("login-alert", "Informe e-mail e senha para entrar.", "error"); return; }
+
+        if (!servidor.ativo()) {
+          if (senha.length < 4) { ui.alerta("login-alert", "A senha precisa ter pelo menos 4 caracteres.", "error"); return; }
+          var nome = email.split("@")[0];
+          store.login(nome, "administrador");
+          ui.limparAlerta("login-alert");
+          mostrarApp();
+          ui.toast("Bem-vindo, " + nome + "!", "info");
+          return;
+        }
+        ocupado(form, true);
+        servidor.post("api/auth/login", { email: email, senha: senha }).then(function (r) {
+          ocupado(form, false);
+          tratarRespostaLogin(r);
+        });
+      });
+
+      // Criar conta
+      el("cadastro-form").addEventListener("submit", function (ev) {
+        ev.preventDefault();
+        var form = ev.currentTarget;
+        var dados = {
+          nome: el("cadastro-nome").value.trim(),
+          email: el("cadastro-email").value.trim(),
+          senha: el("cadastro-senha").value
+        };
+        if (dados.nome.length < 2) { ui.alerta("login-alert", "Informe seu nome.", "error"); return; }
+        if (!EMAIL_OK.test(dados.email)) { ui.alerta("login-alert", "Informe um e-mail válido.", "error"); return; }
+        if (dados.senha.length < 8) { ui.alerta("login-alert", "A senha precisa ter pelo menos 8 caracteres.", "error"); return; }
+        if (dados.senha !== el("cadastro-senha2").value) { ui.alerta("login-alert", "As duas senhas não são iguais.", "error"); return; }
+
+        if (!servidor.ativo()) {
+          aviso("Cadastro recebido", "Na demonstração o cadastro não é enviado. No sistema online, o administrador recebe um e-mail para aprovar e escolher se você é administrador ou funcionário.");
+          form.reset();
+          return;
+        }
+        ocupado(form, true);
+        servidor.post("api/auth/cadastro", dados).then(function (r) {
+          ocupado(form, false);
+          if (r.status === 201) { form.reset(); tratarRespostaLogin({ status: 200, json: r.json }); return; }
+          if (r.status === 202) {
+            form.reset();
+            aviso("Cadastro recebido", r.json.mensagem + " Você recebe um e-mail quando isso acontecer.");
+            return;
+          }
+          ui.alerta("login-alert", r.json.mensagem || "Não foi possível criar a conta.", "error");
+        });
+      });
+
+      // Esqueci a senha
+      el("esqueci-form").addEventListener("submit", function (ev) {
+        ev.preventDefault();
+        var form = ev.currentTarget;
+        var email = el("esqueci-email").value.trim();
+        if (!EMAIL_OK.test(email)) { ui.alerta("login-alert", "Informe um e-mail válido.", "error"); return; }
+        if (!servidor.ativo()) {
+          ui.alerta("login-alert", "Na demonstração nenhum e-mail é enviado. No sistema online, chega um link válido por 30 minutos.", "info");
+          return;
+        }
+        ocupado(form, true);
+        servidor.post("api/auth/esqueci", { email: email }).then(function (r) {
+          ocupado(form, false);
+          ui.alerta("login-alert", r.json.mensagem || "Não foi possível enviar agora.", r.status === 200 ? "success" : "error");
+        });
+      });
+
+      // Nova senha
+      el("redefinir-form").addEventListener("submit", function (ev) {
+        ev.preventDefault();
+        var form = ev.currentTarget;
+        var senha = el("redefinir-senha").value;
+        if (senha.length < 8) { ui.alerta("login-alert", "A senha precisa ter pelo menos 8 caracteres.", "error"); return; }
+        if (senha !== el("redefinir-senha2").value) { ui.alerta("login-alert", "As duas senhas não são iguais.", "error"); return; }
+        ocupado(form, true);
+        servidor.post("api/auth/redefinir", { token: tokenRedefinir, senha: senha }).then(function (r) {
+          ocupado(form, false);
+          if (r.status === 200) {
+            form.reset();
+            tokenRedefinir = null;
+            painel("entrar");
+            ui.alerta("login-alert", r.json.mensagem, "success");
+            return;
+          }
+          ui.alerta("login-alert", r.json.mensagem || "Não foi possível trocar a senha.", "error");
+        });
+      });
+    }
+
+    // Link do e-mail: /?redefinir=TOKEN — guarda o token e limpa o endereço.
+    function lerTokenDaUrl() {
+      var m = /[?&]redefinir=([^&#]+)/.exec(location.search);
+      if (!m) return null;
+      try { history.replaceState(null, "", location.pathname + location.hash); } catch (e) { /* ignora */ }
+      try { return decodeURIComponent(m[1]); } catch (e) { return null; }
     }
 
     function mostrarApp() {
@@ -1845,40 +2381,56 @@ body.is-locked { overflow: hidden; }
     }
 
     function init() {
-      document.getElementById("login-form").addEventListener("submit", function (ev) {
-        ev.preventDefault();
-        var usuario = document.getElementById("login-usuario").value.trim();
-        var senha = document.getElementById("login-senha").value;
-        var papel = document.getElementById("login-papel").value;
-        if (!usuario || !senha) {
-          ui.alerta("login-alert", "Informe usuário e senha para entrar.", "error");
-          return;
-        }
-        if (senha.length < 4) {
-          ui.alerta("login-alert", "A senha precisa ter pelo menos 4 caracteres.", "error");
-          return;
-        }
-        store.login(usuario, papel);
-        ui.limparAlerta("login-alert");
-        mostrarApp();
-        ui.toast("Bem-vindo, " + usuario + "!", "info");
-      });
+      ligarFormularios();
+      tokenRedefinir = lerTokenDaUrl();
+      el("view-login").classList.add("is-detectando");
 
-      if (store.getSessao().autenticado) mostrarApp(); else mostrarLogin();
+      servidor.detectar().then(function (real) {
+        el("view-login").classList.remove("is-detectando");
+        prepararModo();
+        if (!real) {
+          if (store.getSessao().autenticado) mostrarApp(); else mostrarLogin();
+          return;
+        }
+        store.usarServidor(servidor.enfileirar);
+        var aviso = null;
+        try { aviso = sessionStorage.getItem("mz_aviso"); sessionStorage.removeItem("mz_aviso"); } catch (e) { /* ignora */ }
+        if (tokenRedefinir) { store.logout(); mostrarLogin("redefinir"); return; }
+        servidor.get("api/auth/eu").then(function (r) {
+          if (r.status === 200) { entrarComServidor(r.json.usuario, false); return; }
+          store.logout();
+          mostrarLogin();
+          if (aviso === "sessao") ui.alerta("login-alert", "Sua sessão terminou. Entre novamente.", "info");
+          if (aviso === "saiu") ui.alerta("login-alert", "Você saiu do sistema.", "success");
+        });
+      });
     }
 
-    return { init: init, mostrarLogin: mostrarLogin, mostrarApp: mostrarApp };
+    // Recarrega a página para apagar da memória todos os dados da gráfica.
+    function limparERecarregar(motivo) {
+      try { sessionStorage.setItem("mz_aviso", motivo); } catch (e) { /* ignora */ }
+      window.location.replace(window.location.pathname);
+    }
+
+    // Sessão expirou/foi encerrada pelo administrador enquanto a pessoa usava.
+    function sessaoPerdida() {
+      store.logout();
+      limparERecarregar("sessao");
+    }
+
+    return { init: init, mostrarLogin: mostrarLogin, mostrarApp: mostrarApp, sessaoPerdida: sessaoPerdida, limparERecarregar: limparERecarregar };
   })();
 
   /* =========================================================================
      Router
      ========================================================================= */
   var router = {
-    views: ["inicio", "lancamentos", "contas", "orcamentos", "materiais"],
+    views: ["inicio", "lancamentos", "contas", "orcamentos", "materiais", "usuarios"],
     current: "inicio",
     params: {},
     show: function (view, params) {
       if (router.views.indexOf(view) === -1) view = "inicio";
+      if (view === "usuarios" && !(servidor.ativo() && store.isAdmin())) view = "inicio";
       if (!store.getSessao().autenticado) { auth.mostrarLogin(); return; }
       router.params = params || router.params || {};
       router.views.forEach(function (v) {
@@ -1892,6 +2444,7 @@ body.is-locked { overflow: hidden; }
       if (view === "contas") viewContas.render();
       if (view === "orcamentos") viewOrcamentos.render(router.params);
       if (view === "materiais") viewMateriais.render();
+      if (view === "usuarios") viewUsuarios.render();
       router.params = {};
       window.scrollTo({ top: 0, behavior: motion.reduzida ? "auto" : "smooth" });
     },
@@ -2382,7 +2935,7 @@ body.is-locked { overflow: hidden; }
     var iniciado = false;
     var abaAtual = "calculadora";
 
-    function materialPorId(id) { return materiais.find(function (m) { return Number(m.id) === Number(id); }); }
+    function materialPorId(id) { return store.getMaterial(id); }
 
     function popularSelect(select, idSelecionado) {
       var anterior = idSelecionado !== undefined ? idSelecionado : select.value;
@@ -2800,6 +3353,139 @@ body.is-locked { overflow: hidden; }
       document.getElementById("btn-novo-material").classList.toggle("mz-hidden", !admin());
       renderTabela();
     }
+
+    return { render: render };
+  })();
+
+  /* =========================================================================
+     View: Usuários e acesso (só administrador, com servidor)
+     ========================================================================= */
+  var viewUsuarios = (function () {
+    var esc = function (t) { return fmt.escapeHtml(String(t == null ? "" : t)); };
+
+    function dataCurta(txt) {
+      if (!txt) return "";
+      var p = String(txt).slice(0, 10).split("-");
+      return p.length === 3 ? p[2] + "/" + p[1] + "/" + p[0] : txt;
+    }
+
+    function tempo(segundos) {
+      if (segundos == null) return "";
+      var min = Math.max(1, Math.ceil(segundos / 60));
+      if (min < 60) return min + " min";
+      var h = Math.round(min / 60);
+      return h + (h === 1 ? " hora" : " horas");
+    }
+
+    function origem(u) {
+      if (u.google && u.tem_senha) return "Google e senha";
+      return u.google ? "Google" : "Senha";
+    }
+
+    function botao(texto, acao, id, extra) {
+      return '<button type="button" class="mz-btn mz-btn--sm ' + (extra || "mz-btn--secondary") + '" data-acao="' + acao + '" data-id="' + esc(id) + '">' + texto + "</button>";
+    }
+
+    function item(nome, meta, acoes) {
+      return '<div class="mz-acesso-item"><div class="mz-acesso-item__info"><div class="mz-acesso-item__nome">' + nome + "</div>" +
+        '<div class="mz-acesso-item__meta">' + meta + "</div></div>" +
+        '<div class="mz-acesso-item__acoes">' + acoes + "</div></div>";
+    }
+
+    function desenhar(usuarios, bloq) {
+      var pendentes = usuarios.filter(function (u) { return u.status === "pendente"; });
+      var ativos = usuarios.filter(function (u) { return u.status === "ativo"; });
+      var inativos = usuarios.filter(function (u) { return u.status === "recusado" || u.status === "desativado"; });
+
+      document.getElementById("usuarios-pendentes").innerHTML = pendentes.length
+        ? pendentes.map(function (u) {
+            return item(esc(u.nome), esc(u.email) + " · cadastro em " + dataCurta(u.criado_em) + " · " + origem(u),
+              botao("Aprovar como funcionário", "aprovar-funcionario", u.id, "mz-btn--primary") +
+              botao("Aprovar como administrador", "aprovar-administrador", u.id, "mz-btn--ghost") +
+              botao("Recusar", "recusar", u.id));
+          }).join("")
+        : '<p class="mz-acesso-vazio">Nenhum cadastro esperando.</p>';
+
+      document.getElementById("usuarios-ativos").innerHTML = ativos.map(function (u) {
+        var papel = u.papel === "administrador" ? "Administrador" : "Funcionário";
+        var meta = esc(u.email) + " · " + papel + " · " + origem(u) +
+          (u.ultimo_login_em ? " · último acesso " + dataCurta(u.ultimo_login_em) : "");
+        var acoes = u.eu
+          ? '<span class="mz-tag mz-tag--neutral">Você</span>'
+          : (u.papel === "administrador"
+              ? botao("Tornar funcionário", "aprovar-funcionario", u.id)
+              : botao("Tornar administrador", "aprovar-administrador", u.id)) +
+            botao("Tirar acesso", "desativar", u.id);
+        return item(esc(u.nome), meta, acoes);
+      }).join("");
+
+      var cardInativos = document.getElementById("usuarios-inativos-card");
+      cardInativos.hidden = !inativos.length;
+      document.getElementById("usuarios-inativos").innerHTML = inativos.map(function (u) {
+        return item(esc(u.nome), esc(u.email) + " · " + (u.status === "recusado" ? "cadastro recusado" : "acesso retirado"),
+          botao("Dar acesso como funcionário", "aprovar-funcionario", u.id));
+      }).join("");
+
+      document.getElementById("bloqueios-seu-ip").textContent = bloq.seuIp ? "O endereço da sua rede agora é " + bloq.seuIp + "." : "";
+      document.getElementById("usuarios-bloqueios").innerHTML = bloq.bloqueios.length
+        ? bloq.bloqueios.map(function (b) {
+            var quando = b.permanente ? '<span class="mz-tag mz-tag--danger">Permanente</span>' : '<span class="mz-tag mz-tag--warning">Libera em ' + tempo(b.segundos_restantes) + "</span>";
+            return item(esc(b.ip) + quando, esc(b.motivo) + " · desde " + dataCurta(b.desde), botao("Liberar", "liberar-ip", b.ip, "mz-btn--primary"));
+          }).join("")
+        : '<p class="mz-acesso-vazio">Nenhuma rede bloqueada.</p>';
+    }
+
+    function render() {
+      var alvo = document.getElementById("usuarios-pendentes");
+      if (!alvo.innerHTML) alvo.innerHTML = '<p class="mz-acesso-vazio">Carregando…</p>';
+      Promise.all([servidor.get("api/admin/usuarios"), servidor.get("api/admin/bloqueios")]).then(function (rs) {
+        if (rs[0].status === 401 || rs[1].status === 401) { auth.sessaoPerdida(); return; }
+        if (rs[0].status === 403) { router.goto("inicio"); return; }
+        if (rs[0].status !== 200 || rs[1].status !== 200) {
+          ui.alerta("usuarios-alert", (rs[0].json.mensagem || rs[1].json.mensagem || "Não foi possível carregar."), "error");
+          return;
+        }
+        ui.limparAlerta("usuarios-alert");
+        desenhar(rs[0].json.usuarios, rs[1].json);
+      });
+    }
+
+    function executar(acao, id) {
+      var chamadas = {
+        "aprovar-funcionario":   function () { return servidor.post("api/admin/usuarios/" + id + "/aprovar", { papel: "funcionario" }); },
+        "aprovar-administrador": function () { return servidor.post("api/admin/usuarios/" + id + "/aprovar", { papel: "administrador" }); },
+        "recusar":               function () { return servidor.post("api/admin/usuarios/" + id + "/recusar"); },
+        "desativar":             function () { return servidor.post("api/admin/usuarios/" + id + "/desativar"); },
+        "liberar-ip":            function () { return servidor.post("api/admin/bloqueios/liberar", { ip: id }); }
+      };
+      var avisos = {
+        "aprovar-funcionario": "Acesso de funcionário liberado.",
+        "aprovar-administrador": "Acesso de administrador liberado.",
+        "recusar": "Cadastro recusado.",
+        "desativar": "Acesso retirado.",
+        "liberar-ip": "Rede liberada."
+      };
+      chamadas[acao]().then(function (r) {
+        if (r.status === 401) { auth.sessaoPerdida(); return; }
+        if (r.status !== 200) { ui.toast(r.json.mensagem || "Não foi possível concluir.", "error"); return; }
+        ui.toast(avisos[acao]);
+        render();
+      });
+    }
+
+    document.addEventListener("click", function (ev) {
+      var b = ev.target.closest("#view-usuarios [data-acao]");
+      if (!b) return;
+      var acao = b.getAttribute("data-acao");
+      var id = b.getAttribute("data-id");
+      if (acao === "desativar") {
+        ui.confirmar("Tirar acesso", "A pessoa sai do sistema na hora e não consegue mais entrar até você dar acesso de novo.", function () { executar(acao, id); }, "Tirar acesso");
+      } else if (acao === "recusar") {
+        ui.confirmar("Recusar cadastro", "A pessoa não vai conseguir entrar. Você pode dar acesso depois, se mudar de ideia.", function () { executar(acao, id); }, "Recusar");
+      } else {
+        executar(acao, id);
+      }
+    });
 
     return { render: render };
   })();

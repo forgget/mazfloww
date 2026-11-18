@@ -31,8 +31,7 @@ CREATE TABLE IF NOT EXISTS usuarios (
   id               INT UNSIGNED  NOT NULL AUTO_INCREMENT,
   nome             VARCHAR(120)  NOT NULL,
   email            VARCHAR(190)  NOT NULL COMMENT 'sempre minúsculo; é o login',
-  senha_hash       VARCHAR(255)  NULL     COMMENT 'scrypt; NULL para quem só entra com Google',
-  google_sub       VARCHAR(64)   NULL     COMMENT 'id da conta Google vinculada',
+  senha_hash       VARCHAR(255)  NOT NULL COMMENT 'scrypt',
   papel            ENUM('administrador','funcionario') NOT NULL DEFAULT 'funcionario',
   status           ENUM('pendente','ativo','recusado','desativado') NOT NULL DEFAULT 'pendente',
   aprovado_por     INT UNSIGNED  NULL,
@@ -42,7 +41,6 @@ CREATE TABLE IF NOT EXISTS usuarios (
   atualizado_em    DATETIME      NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (id),
   UNIQUE KEY uq_usuarios_email  (email),
-  UNIQUE KEY uq_usuarios_google (google_sub),
   KEY ix_usuarios_status (status),
   CONSTRAINT fk_usuarios_aprovador FOREIGN KEY (aprovado_por) REFERENCES usuarios (id) ON DELETE SET NULL
 ) ENGINE=InnoDB;
@@ -258,7 +256,7 @@ WHERE data >= DATE_FORMAT(CURDATE(), '%Y-%m-01');
 --      (protege contra ataque vindo de muitos IPs, sem banir ninguém)
 --
 -- Contam como falha só os motivos suspeitos: senha errada, e-mail inexistente,
--- token de redefinição inválido e credencial Google inválida. Conta pendente
+-- e token de redefinição inválido. Conta pendente
 -- com senha certa NÃO conta.
 --
 -- Um login certo zera a contagem de falhas do IP (todos da gráfica costumam sair
@@ -431,14 +429,14 @@ BEGIN
   INSERT INTO tentativas_login (ip, email, sucesso, motivo)
   VALUES (p_ip, NULLIF(p_email, ''), p_sucesso, p_motivo);
 
-  IF p_sucesso = 0 AND p_motivo IN ('senha_incorreta', 'email_inexistente', 'token_invalido', 'google_invalido') THEN
+  IF p_sucesso = 0 AND p_motivo IN ('senha_incorreta', 'email_inexistente', 'token_invalido') THEN
     CALL sp_inicio_contagem(p_ip, v_desde, v_depois_id);
 
     SELECT COUNT(*) INTO v_falhas
       FROM tentativas_login
      WHERE ip = p_ip
        AND sucesso = 0
-       AND motivo IN ('senha_incorreta', 'email_inexistente', 'token_invalido', 'google_invalido')
+       AND motivo IN ('senha_incorreta', 'email_inexistente', 'token_invalido')
        AND criado_em >= v_desde
        AND id > v_depois_id;
 

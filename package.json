@@ -1,0 +1,13 @@
+{
+  "name": "mazflow",
+  "private": true,
+  "description": "MazFlow — controle financeiro da Gráfica Mazart. O servidor fica em server/; a página em demo/; o banco em database/.",
+  "engines": {
+    "node": "22"
+  },
+  "scripts": {
+    "build": "cd server && npm ci --omit=dev",
+    "start": "cd server && npm run db:migrar && npm start",
+    "test": "cd server && npm test"
+  }
+}

@@ -1,4 +1,4 @@
-// Rotas de autenticação: cadastro, login, Google, sair, recuperar senha.
+// Rotas de autenticação: cadastro, login, sair, recuperar senha.
 import { Router } from "express";
 import {
   gerarHashSenha, conferirSenha, gastarTempoDeSenha, gerarToken, hashToken,
@@ -24,7 +24,7 @@ function minutos(segundos) {
   return Math.max(1, Math.ceil((segundos || 60) / 60));
 }
 
-export function rotasAuth({ banco, config, acesso, email, verificarGoogle }) {
+export function rotasAuth({ banco, config, acesso, email }) {
   const r = Router();
 
   // ---------------------------------------------------------------------------
@@ -73,7 +73,7 @@ export function rotasAuth({ banco, config, acesso, email, verificarGoogle }) {
     return res.status(401).json({ erro: "credenciais", mensagem, tentativasRestantes: registro.restantes });
   }
 
-  // Conta encontrada e credencial certa: decide pelo status.
+  // Conta encontrada e senha certa: decide pelo status.
   async function concluirLogin(req, res, usuario) {
     const ip = ipDaRequisicao(req);
     if (usuario.status === "pendente") {
@@ -175,60 +175,9 @@ export function rotasAuth({ banco, config, acesso, email, verificarGoogle }) {
       const reg = await acesso.registrar(ip, emailLogin, false, "email_inexistente");
       return responderFalha(res, reg, "E-mail ou senha incorretos.");
     }
-    const ok = usuario.senha_hash ? await conferirSenha(senha, usuario.senha_hash) : (await gastarTempoDeSenha(senha), false);
-    if (!ok) {
+    if (!(await conferirSenha(senha, usuario.senha_hash))) {
       const reg = await acesso.registrar(ip, emailLogin, false, "senha_incorreta");
-      const dica = usuario.senha_hash ? "E-mail ou senha incorretos." : "E-mail ou senha incorretos. Se você entra pelo Google, use o botão do Google.";
-      return responderFalha(res, reg, dica);
-    }
-    return concluirLogin(req, res, usuario);
-  });
-
-  // ---------------------------------------------------------------------------
-  // POST /api/auth/google — { credential } (ID token do botão do Google)
-  // ---------------------------------------------------------------------------
-  r.post("/google", async (req, res) => {
-    const ip = ipDaRequisicao(req);
-    if (!config.googleClientId) return res.status(503).json({ erro: "google_desligado", mensagem: "Login com Google não está configurado." });
-    const credencial = req.body?.credential;
-    if (typeof credencial !== "string" || credencial.length > 4096) return res.status(400).json({ erro: "dados", mensagem: "Credencial do Google ausente." });
-
-    if (await barrarSeBloqueado(req, res, null)) return;
-
-    let dados;
-    try {
-      dados = await verificarGoogle(credencial);
-    } catch {
-      dados = null;
-    }
-    if (!dados || !dados.sub || !dados.email || dados.email_verified !== true) {
-      const reg = await acesso.registrar(ip, null, false, "google_invalido");
-      return responderFalha(res, reg, "Não foi possível confirmar sua conta Google. Tente de novo.");
-    }
-
-    const emailGoogle = normalizarEmail(dados.email);
-    let usuario = await banco.primeira("SELECT id, nome, email, papel, status FROM usuarios WHERE google_sub = ?", [dados.sub]);
-    if (!usuario) {
-      usuario = await banco.primeira("SELECT id, nome, email, papel, status, google_sub FROM usuarios WHERE email = ?", [emailGoogle]);
-      if (usuario) {
-        if (usuario.google_sub && usuario.google_sub !== dados.sub) {
-          const reg = await acesso.registrar(ip, emailGoogle, false, "google_invalido");
-          return responderFalha(res, reg, "Este e-mail já está ligado a outra conta Google.");
-        }
-        // E-mail confirmado pelo Google: vincula à conta existente.
-        await banco.consulta("UPDATE usuarios SET google_sub = ? WHERE id = ?", [dados.sub, usuario.id]);
-      }
-    }
-    if (!usuario) {
-      const nome = String(dados.name || emailGoogle.split("@")[0]).slice(0, 120);
-      const { status, papel } = await statusInicial(emailGoogle);
-      const resultado = await banco.consulta(
-        "INSERT INTO usuarios (nome, email, google_sub, papel, status, aprovado_em) VALUES (?, ?, ?, ?, ?, IF(? = 'ativo', NOW(), NULL))",
-        [nome, emailGoogle, dados.sub, papel, status, status]
-      );
-      usuario = { id: resultado.insertId, nome, email: emailGoogle, papel, status };
-      await acesso.registrar(ip, emailGoogle, true, "cadastro");
-      if (status === "pendente") await avisarAdmins(usuario);
+      return responderFalha(res, reg, "E-mail ou senha incorretos.");
     }
     return concluirLogin(req, res, usuario);
   });

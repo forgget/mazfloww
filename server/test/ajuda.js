@@ -1,5 +1,5 @@
 // Infraestrutura dos testes: banco mazflow_teste, servidor em porta livre,
-// e-mail e Google falsos, e um "navegador" que guarda cookies.
+// e-mail falso e um "navegador" que guarda cookies.
 import { carregarConfig } from "../src/config.js";
 import { criarBanco } from "../src/db.js";
 import { criarApp } from "../src/app.js";
@@ -7,13 +7,12 @@ import { migrar } from "../scripts/migrar.js";
 
 export const DONO = "dono@grafica.test";
 
-export async function prepararAmbiente({ googleClientId = "cliente-teste" } = {}) {
+export async function prepararAmbiente() {
   const base = carregarConfig();
   const config = carregarConfig({
     producao: false,
     appUrl: "http://localhost:3999",
     donoEmail: DONO,
-    googleClientId,
     trustProxy: "true", // os testes escolhem o IP pelo cabeçalho X-Forwarded-For
     banco: { ...base.banco, database: process.env.TEST_DB_NAME || "mazflow_teste" }
   });
@@ -25,13 +24,7 @@ export async function prepararAmbiente({ googleClientId = "cliente-teste" } = {}
     get: (_, tipo) => async (...args) => { emails.push({ tipo, args }); }
   });
 
-  const contasGoogle = new Map(); // credencial -> payload
-  const verificarGoogle = async (credencial) => {
-    if (!contasGoogle.has(credencial)) throw new Error("token inválido");
-    return contasGoogle.get(credencial);
-  };
-
-  const app = criarApp({ config, banco, email, verificarGoogle });
+  const app = criarApp({ config, banco, email });
   const servidor = await new Promise((ok) => { const s = app.listen(0, () => ok(s)); });
   const url = `http://127.0.0.1:${servidor.address().port}`;
 
@@ -45,7 +38,6 @@ export async function prepararAmbiente({ googleClientId = "cliente-teste" } = {}
     }
     await banco.consulta("SET FOREIGN_KEY_CHECKS = 1");
     emails.length = 0;
-    contasGoogle.clear();
   }
 
   // Faz o tempo "andar" para trás nos registros de um IP (simula espera).
@@ -90,7 +82,7 @@ export async function prepararAmbiente({ googleClientId = "cliente-teste" } = {}
     await banco.fechar();
   }
 
-  return { config, banco, emails, contasGoogle, url, limpar, passarTempo, navegador, fechar };
+  return { config, banco, emails, url, limpar, passarTempo, navegador, fechar };
 }
 
 // Cria o dono (administrador) já logado.

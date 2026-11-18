@@ -24,6 +24,5 @@ setInterval(limpar, 24 * 60 * 60 * 1000).unref();
 app.listen(config.porta, () => {
   console.log(`MazFlow rodando em ${config.appUrl} (porta ${config.porta})`);
   if (!config.donoEmail) console.log("Aviso: DONO_EMAIL vazio — ninguém vira administrador automaticamente.");
-  if (!config.googleClientId) console.log("Aviso: GOOGLE_CLIENT_ID vazio — o botão do Google fica escondido.");
   if (!config.smtp.host) console.log("Aviso: SMTP não configurado — os e-mails aparecem só aqui no log.");
 });

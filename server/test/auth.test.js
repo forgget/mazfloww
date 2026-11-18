@@ -319,37 +319,6 @@ test("recuperação: chutar tokens conta como tentativa e bloqueia o IP", async 
   assert.equal(r.status, 429);
 });
 
-// ---------------------------------------------------------------- Google --
-
-test("Google: conta nova fica pendente; com o e-mail do dono vira administrador", async () => {
-  amb.contasGoogle.set("cred-ana", { sub: "g-ana", email: "ana@gmail.test", email_verified: true, name: "Ana Google" });
-  const ana = await amb.navegador("10.20.0.1").post("/api/auth/google", { credential: "cred-ana" });
-  assert.equal(ana.status, 403);
-  assert.equal(ana.json.erro, "conta_pendente");
-
-  amb.contasGoogle.set("cred-dono", { sub: "g-dono", email: DONO, email_verified: true, name: "Dono" });
-  const nav = amb.navegador("10.20.0.2");
-  const dono = await nav.post("/api/auth/google", { credential: "cred-dono" });
-  assert.equal(dono.status, 200);
-  assert.equal(dono.json.usuario.papel, "administrador");
-});
-
-test("Google: vincula à conta existente com o mesmo e-mail", async () => {
-  await criarDono(amb);
-  amb.contasGoogle.set("cred", { sub: "g-123", email: DONO, email_verified: true, name: "Dono" });
-  const r = await amb.navegador("10.20.0.3").post("/api/auth/google", { credential: "cred" });
-  assert.equal(r.status, 200);
-  const u = await amb.banco.primeira("SELECT google_sub FROM usuarios WHERE email = ?", [DONO]);
-  assert.equal(u.google_sub, "g-123");
-});
-
-test("Google: credencial falsa ou e-mail não verificado é recusado", async () => {
-  const nav = amb.navegador("10.20.0.4");
-  assert.equal((await nav.post("/api/auth/google", { credential: "inventada" })).status, 401);
-  amb.contasGoogle.set("nao-verificado", { sub: "g-x", email: "x@gmail.test", email_verified: false });
-  assert.equal((await nav.post("/api/auth/google", { credential: "nao-verificado" })).status, 401);
-});
-
 // ---------------------------------------------------- proteção da API ----
 
 test("pedido de outro site (Origin diferente) é recusado", async () => {
@@ -374,7 +343,7 @@ test("cabeçalhos de segurança e página servida", async () => {
   assert.match(await r.text(), /MazFlow/);
 });
 
-test("/api/config informa o modo servidor e o client id do Google", async () => {
+test("/api/config informa o modo servidor", async () => {
   const r = await amb.navegador().get("/api/config");
-  assert.deepEqual(r.json, { modo: "servidor", googleClientId: "cliente-teste" });
+  assert.deepEqual(r.json, { modo: "servidor" });
 });

@@ -10,7 +10,7 @@
 --      (protege contra ataque vindo de muitos IPs, sem banir ninguém)
 --
 -- Contam como falha só os motivos suspeitos: senha errada, e-mail inexistente,
--- token de redefinição inválido e credencial Google inválida. Conta pendente
+-- e token de redefinição inválido. Conta pendente
 -- com senha certa NÃO conta.
 --
 -- Um login certo zera a contagem de falhas do IP (todos da gráfica costumam sair
@@ -184,14 +184,14 @@ BEGIN
   INSERT INTO tentativas_login (ip, email, sucesso, motivo)
   VALUES (p_ip, NULLIF(p_email, ''), p_sucesso, p_motivo);
 
-  IF p_sucesso = 0 AND p_motivo IN ('senha_incorreta', 'email_inexistente', 'token_invalido', 'google_invalido') THEN
+  IF p_sucesso = 0 AND p_motivo IN ('senha_incorreta', 'email_inexistente', 'token_invalido') THEN
     CALL sp_inicio_contagem(p_ip, v_desde, v_depois_id);
 
     SELECT COUNT(*) INTO v_falhas
       FROM tentativas_login
      WHERE ip = p_ip
        AND sucesso = 0
-       AND motivo IN ('senha_incorreta', 'email_inexistente', 'token_invalido', 'google_invalido')
+       AND motivo IN ('senha_incorreta', 'email_inexistente', 'token_invalido')
        AND criado_em >= v_desde
        AND id > v_depois_id;
 

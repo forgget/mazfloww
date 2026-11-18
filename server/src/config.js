@@ -35,7 +35,6 @@ export function carregarConfig(sobrescrever = {}) {
     porta: Number(texto("PORT", "3000")),
     appUrl: texto("APP_URL", "http://localhost:3000").replace(/\/$/, ""),
     donoEmail: texto("DONO_EMAIL", "").trim().toLowerCase(),
-    googleClientId: texto("GOOGLE_CLIENT_ID", ""),
     trustProxy: texto("TRUST_PROXY", producao ? "1" : "0"),
     banco,
     smtp: {
@@ -53,8 +52,9 @@ export function carregarConfig(sobrescrever = {}) {
   if (config.producao) {
     const faltando = [];
     if (!config.donoEmail) faltando.push("DONO_EMAIL");
-    if (!config.smtp.host) faltando.push("SMTP_HOST");
     if (!config.appUrl.startsWith("https://")) faltando.push("APP_URL (com https://)");
+    // SMTP é opcional: sem ele, os e-mails (recuperação de senha, avisos) só
+    // aparecem no log do servidor — o resto do sistema funciona.
     if (faltando.length) {
       throw new Error("Configuração incompleta para produção: " + faltando.join(", "));
     }

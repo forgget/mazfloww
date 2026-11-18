@@ -23,13 +23,12 @@ export function rotasAdmin({ banco, acesso, email }) {
   // GET /api/admin/usuarios
   r.get("/usuarios", async (req, res) => {
     const usuarios = await banco.consulta(
-      `SELECT id, nome, email, papel, status, (google_sub IS NOT NULL) AS google,
-              (senha_hash IS NOT NULL) AS tem_senha, criado_em, aprovado_em, ultimo_login_em
+      `SELECT id, nome, email, papel, status, criado_em, aprovado_em, ultimo_login_em
          FROM usuarios
         ORDER BY FIELD(status, 'pendente', 'ativo', 'desativado', 'recusado'), criado_em DESC`
     );
     res.json({
-      usuarios: usuarios.map((u) => ({ ...u, google: Number(u.google) === 1, tem_senha: Number(u.tem_senha) === 1, eu: u.id === req.usuario.id }))
+      usuarios: usuarios.map((u) => ({ ...u, eu: u.id === req.usuario.id }))
     });
   });
 

@@ -1,9 +1,8 @@
 // Monta o servidor Express. Recebe as dependências por parâmetro para os
-// testes poderem trocar o e-mail e a verificação do Google por versões falsas.
+// testes poderem trocar o envio de e-mail por uma versão falsa.
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import express from "express";
-import { OAuth2Client } from "google-auth-library";
 import { criarAcesso, ipDaRequisicao } from "./acesso.js";
 import { criarEmail } from "./email.js";
 import { rotasAuth } from "./rotas/auth.js";
@@ -13,15 +12,7 @@ import { rotasDados } from "./rotas/dados.js";
 const AQUI = path.dirname(fileURLToPath(import.meta.url));
 const PASTA_PAGINA = path.resolve(AQUI, "..", "..", "demo");
 
-function verificadorGoogle(config) {
-  const cliente = new OAuth2Client(config.googleClientId);
-  return async (credencial) => {
-    const ticket = await cliente.verifyIdToken({ idToken: credencial, audience: config.googleClientId });
-    return ticket.getPayload();
-  };
-}
-
-export function criarApp({ config, banco, email = criarEmail(config), verificarGoogle = verificadorGoogle(config) }) {
+export function criarApp({ config, banco, email = criarEmail(config) }) {
   const app = express();
   const acesso = criarAcesso({ banco, config });
   const origemApp = new URL(config.appUrl).origin;
@@ -39,11 +30,10 @@ export function criarApp({ config, banco, email = criarEmail(config), verificarG
       "Permissions-Policy": "camera=(), microphone=(), geolocation=()",
       "Content-Security-Policy": [
         "default-src 'self'",
-        "script-src 'self' 'unsafe-inline' https://accounts.google.com/gsi/client",
-        "style-src 'self' 'unsafe-inline' https://accounts.google.com/gsi/style",
-        "frame-src https://accounts.google.com/gsi/",
-        "connect-src 'self' https://accounts.google.com/gsi/",
-        "img-src 'self' data: https://*.googleusercontent.com",
+        "script-src 'self' 'unsafe-inline'",
+        "style-src 'self' 'unsafe-inline'",
+        "connect-src 'self'",
+        "img-src 'self' data:",
         "base-uri 'none'",
         "form-action 'self'",
         "frame-ancestors 'none'"
@@ -93,11 +83,11 @@ export function criarApp({ config, banco, email = criarEmail(config), verificarG
   });
 
   api.get("/config", (req, res) => {
-    res.json({ modo: "servidor", googleClientId: config.googleClientId || null });
+    res.json({ modo: "servidor" });
   });
 
   // Express 5 repassa erros de funções async ao tratador de erros.
-  api.use("/auth", rotasAuth({ banco, config, acesso, email, verificarGoogle }));
+  api.use("/auth", rotasAuth({ banco, config, acesso, email }));
 
   api.use("/admin", (req, res, next) => {
     if (!req.usuario) return res.status(401).json({ erro: "sem_sessao", mensagem: "Entre novamente." });

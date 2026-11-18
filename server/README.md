@@ -1,8 +1,7 @@
 # Servidor do MazFlow
 
-Login seguro da Gráfica Mazart: cadastro com aprovação do dono, login com
-Google, recuperação de senha por e-mail e bloqueio de IP contra tentativas de
-invasão. Serve também a página do sistema (`demo/index.html`) no mesmo endereço.
+Login seguro da Gráfica Mazart: cadastro com aprovação do dono, recuperação
+de senha por e-mail e bloqueio de IP contra tentativas de invasão. Serve também a página do sistema (`demo/index.html`) no mesmo endereço.
 
 Caixa, contas fixas, materiais e orçamentos ficam **só no MySQL**. A página
 mantém os dados apenas na memória enquanto está aberta (nada é gravado no
@@ -33,7 +32,7 @@ As regras de bloqueio estão em SQL: `database/07_acesso.sql`
 
 ## Rodar no computador
 
-Precisa de Node.js 20+ e MySQL 8.
+Precisa de Node.js 22+ e MySQL 8.
 
 ```bash
 cd server
@@ -44,7 +43,7 @@ npm run dev               # http://localhost:3000
 ```
 
 Sem `SMTP_HOST`, os e-mails (link de recuperação, aviso de cadastro) aparecem
-no terminal. Sem `GOOGLE_CLIENT_ID`, o botão do Google não aparece.
+no terminal.
 
 Primeiro acesso: abra o sistema, clique em **Criar conta** e use o e-mail de
 `DONO_EMAIL`. Essa conta já entra como administrador. As próximas ficam
@@ -61,9 +60,10 @@ npm test
 ## Publicar (exemplo com Railway)
 
 1. Crie um projeto no [Railway](https://railway.app) a partir do repositório
-   do GitHub. Deixe o **Root Directory** vazio (raiz do repositório): o
-   servidor precisa da pasta `demo/` (a página) e de `database/` (o SQL).
-   Em **Settings → Build**, use o comando `cd server && npm ci`.
+   do GitHub, com o **Root Directory** vazio (raiz do repositório): o servidor
+   precisa de `demo/` (a página) e `database/` (o SQL). O `package.json` da
+   raiz já diz como instalar (`build`) e iniciar (`start`, que roda a
+   migração antes).
 2. Adicione o serviço **MySQL** ao projeto. Na aba de variáveis do servidor,
    crie `DATABASE_URL` apontando para a do MySQL (`${{MySQL.MYSQL_URL}}`).
 3. Crie as variáveis:
@@ -71,27 +71,21 @@ npm test
    - `APP_URL=https://<endereço gerado pelo Railway ou seu domínio>`
    - `DONO_EMAIL=<e-mail do dono>`
    - `TRUST_PROXY=1`
-   - `GOOGLE_CLIENT_ID`, `SMTP_*`, `EMAIL_FROM` (veja abaixo)
-4. Em **Settings → Deploy**, use o comando de início
-   `cd server && npm run db:migrar && npm start` (a migração não apaga dados).
-5. Abra o endereço, crie a conta do dono e pronto.
-
-### Login com Google
-
-1. [Google Cloud Console](https://console.cloud.google.com) → crie um projeto.
-2. **APIs e serviços → Tela de consentimento OAuth**: tipo *Externo*, nome
-   "MazFlow", e-mail de suporte.
-3. **Credenciais → Criar credenciais → ID do cliente OAuth → Aplicativo da Web**.
-4. Em **Origens JavaScript autorizadas**, coloque o `APP_URL`
-   (e `http://localhost:3000` para testar no computador).
-5. Copie o **ID do cliente** para `GOOGLE_CLIENT_ID`. Não é preciso segredo.
+   - `SMTP_*`, `EMAIL_FROM` (veja abaixo)
+4. Abra o endereço, crie a conta do dono e pronto.
 
 ### E-mail (recuperação de senha e avisos)
 
-Qualquer SMTP serve. Exemplo com [Brevo](https://www.brevo.com) (gratuito até
-300 e-mails/dia): **SMTP & API → SMTP** e use
-`SMTP_HOST=smtp-relay.brevo.com`, `SMTP_PORT=587`, `SMTP_USER` e `SMTP_PASS`
-mostrados lá. Valide o remetente de `EMAIL_FROM` no painel.
+Qualquer SMTP serve. Duas opções gratuitas:
+
+- **Gmail** (até ~500 e-mails/dia): ative a verificação em duas etapas na
+  conta e crie uma *senha de app* em <https://myaccount.google.com/apppasswords>.
+  Use `SMTP_HOST=smtp.gmail.com`, `SMTP_PORT=465`, `SMTP_USER=<seu gmail>`,
+  `SMTP_PASS=<senha de app, 16 letras>` e `EMAIL_FROM=MazFlow <seu gmail>`.
+  Nunca use a senha normal da conta.
+- **[Brevo](https://www.brevo.com)** (até 300 e-mails/dia): **SMTP & API →
+  SMTP**, com `SMTP_HOST=smtp-relay.brevo.com`, `SMTP_PORT=587` e o usuário e
+  a senha mostrados lá. Valide o remetente de `EMAIL_FROM` no painel.
 
 ## Emergência: dono bloqueado
 
@@ -113,7 +107,6 @@ npm run liberar-ip -- 200.1.2.3 # libera esse IP
 | GET | `/api/auth/eu` | logado |
 | POST | `/api/auth/cadastro` `{nome,email,senha}` | todos |
 | POST | `/api/auth/login` `{email,senha}` | todos |
-| POST | `/api/auth/google` `{credential}` | todos |
 | POST | `/api/auth/sair` | logado |
 | POST | `/api/auth/esqueci` `{email}` | todos |
 | POST | `/api/auth/redefinir` `{token,senha}` | todos |

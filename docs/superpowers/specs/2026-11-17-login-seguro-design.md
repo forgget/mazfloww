@@ -21,7 +21,7 @@ os protege.
 | Servidor | Node.js (Express) + MySQL |
 | Cadastro | Livre, mas a conta fica **pendente** até o dono aprovar e definir o papel |
 | Papel | Definido pelo dono (administrador/funcionário); some o "Entrar como" |
-| Login | E-mail + senha, ou conta Google |
+| Login | E-mail + senha (login com Google removido a pedido do cliente) |
 | Recuperação | Só por e-mail (link de uso único, 30 min) |
 | Bloqueio | Por IP, escalonado, com banimento permanente — regras em SQL |
 
@@ -30,7 +30,7 @@ os protege.
 ```
 navegador ──HTTPS──► Express (server/)
                       ├─ entrega demo/index.html e a API no mesmo endereço
-                      ├─ /api/auth/*   cadastro, login, Google, sair, recuperar
+                      ├─ /api/auth/*   cadastro, login, sair, recuperar
                       ├─ /api/admin/*  aprovar usuários, liberar IPs (só administrador)
                       └─ mysql2 (consultas sempre parametrizadas) ──► MySQL
 ```
@@ -52,8 +52,6 @@ navegador ──HTTPS──► Express (server/)
   Redefinir a senha encerra todas as sessões da pessoa.
 - **Tokens de redefinição**: idem — só o hash no banco, uso único, 30 min.
 - **Sem enumeração de contas**: "esqueci a senha" responde sempre igual.
-- **Google**: o ID token é verificado no servidor (`google-auth-library`):
-  assinatura, `aud` = `GOOGLE_CLIENT_ID`, `email_verified`.
 - Cabeçalhos: `X-Content-Type-Options`, `Referrer-Policy`, `X-Frame-Options`,
   `Strict-Transport-Security` (produção).
 
@@ -83,14 +81,11 @@ e libera bloqueios na tela "Usuários e acesso", e existe o comando de emergênc
   administrador ativo automaticamente. Todos os outros entram como `pendente`.
 - Os administradores recebem e-mail a cada novo cadastro; a pessoa recebe
   e-mail quando é aprovada.
-- Login com Google de alguém sem conta cria um cadastro pendente com o nome e
-  e-mail do Google. Se já existe conta com o mesmo e-mail, a conta Google é
-  vinculada a ela.
 - Estados: `pendente`, `ativo`, `recusado`, `desativado`. Só `ativo` entra.
 
 ## Telas
 
-- Login: e-mail, senha, "Esqueci minha senha", botão Google, "Criar conta".
+- Login: e-mail, senha, "Esqueci minha senha", "Criar conta".
   Sem "Entrar como".
 - Criar conta: nome, e-mail, senha, confirmar senha → mensagem "aguardando aprovação".
 - Esqueci a senha: e-mail → mensagem neutra.
@@ -102,7 +97,7 @@ e libera bloqueios na tela "Usuários e acesso", e existe o comando de emergênc
 ## Configuração (.env)
 
 `DATABASE_URL` ou `DB_HOST/DB_PORT/DB_USER/DB_PASSWORD/DB_NAME`, `APP_URL`,
-`DONO_EMAIL`, `GOOGLE_CLIENT_ID`, `SMTP_HOST/SMTP_PORT/SMTP_USER/SMTP_PASS/EMAIL_FROM`,
+`DONO_EMAIL`, `SMTP_HOST/SMTP_PORT/SMTP_USER/SMTP_PASS/EMAIL_FROM`,
 `TRUST_PROXY` (1 atrás do proxy da hospedagem), `NODE_ENV`.
 Sem SMTP configurado, os e-mails são impressos no log (desenvolvimento).
 
